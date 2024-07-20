@@ -53,6 +53,12 @@ const docTemplate = `{
                         "description": "构建输出目录",
                         "name": "buildOutputDir",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "目标路径，默认值为 /home/sqray/cultures",
+                        "name": "destinationPath",
+                        "in": "query"
                     }
                 ],
                 "responses": {

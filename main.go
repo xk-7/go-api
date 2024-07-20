@@ -64,6 +64,7 @@ func createUser(c *gin.Context) {
 // @Param buildDir query string false "构建目录"
 // @Param buildCommand query string false "构建命令"
 // @Param buildOutputDir query string false "构建输出目录"
+// @Param destinationPath query string false "目标路径，默认值为 /home/sqray/cultures"
 // @Success 200 {string} string "Files copied successfully"
 // @Failure 400 {string} string "Invalid input"
 // @Failure 500 {string} string "Internal server error"
@@ -90,6 +91,11 @@ func copy(c *gin.Context) {
 		buildOutputDir = fmt.Sprintf("%s/prod-https", buildDir) // 默认值
 	}
 
+	destinationPath := c.Query("destinationPath")
+	if destinationPath == "" {
+		destinationPath = "/home/sqray/cultures" // 默认值
+	}
+
 	// 将 IP 列表拆分为字符串数组
 	servers := strings.Split(serverIps, ",")
 
@@ -108,7 +114,7 @@ func copy(c *gin.Context) {
 		}
 
 		// 复制文件到服务器
-		scpCommand := fmt.Sprintf("scp -r %s/* root@%s:/home/sqray/cultures", buildOutputDir, server)
+		scpCommand := fmt.Sprintf("scp -r %s/* root@%s:%s", buildOutputDir, server, destinationPath)
 		cmd = exec.Command("sh", "-c", scpCommand)
 		_, err := cmd.CombinedOutput()
 		if err != nil {

@@ -24,6 +24,10 @@ paths:
         in: query
         name: buildOutputDir
         type: string
+      - description: 目标路径，默认值为 /home/sqray/cultures
+        in: query
+        name: destinationPath
+        type: string
       produces:
       - application/json
       responses:
