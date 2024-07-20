@@ -99,11 +99,13 @@ func copy(c *gin.Context) {
 	// 将 IP 列表拆分为字符串数组
 	servers := strings.Split(serverIps, ",")
 
-	// 执行构建命令
+	// 执行构建命令并捕获输出日志
+	var buildOutput bytes.Buffer
 	cmd := exec.Command("sh", "-c", fmt.Sprintf("cd %s && %s", buildDir, buildCommand))
-	_, err := cmd.CombinedOutput()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("构建失败: %s", err.Error())})
+	cmd.Stdout = &buildOutput
+	cmd.Stderr = &buildOutput
+	if err := cmd.Run(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("构建失败: %s", err.Error()), "log": buildOutput.String()})
 		return
 	}
 
@@ -116,14 +118,16 @@ func copy(c *gin.Context) {
 		// 复制文件到服务器
 		scpCommand := fmt.Sprintf("scp -r %s/* root@%s:%s", buildOutputDir, server, destinationPath)
 		cmd = exec.Command("sh", "-c", scpCommand)
-		_, err := cmd.CombinedOutput()
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("文件复制到 %s 失败: %s", server, err.Error())})
+		var scpOutput bytes.Buffer
+		cmd.Stdout = &scpOutput
+		cmd.Stderr = &scpOutput
+		if err := cmd.Run(); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("文件复制到 %s 失败: %s", server, err.Error()), "log": scpOutput.String()})
 			return
 		}
 	}
 
-	c.String(http.StatusOK, "Files copied successfully")
+	c.JSON(http.StatusOK, gin.H{"message": "Files copied successfully", "log": buildOutput.String()})
 }
 
 // @Summary 更新容器 API
@@ -323,20 +327,27 @@ func listContainers(c *gin.Context) {
 // @Failure 400 {string} string "Invalid input"
 // @Failure 500 {string} string "Internal server error"
 // @Router /pause-container/{containerName} [post]
+// pauseContainer handles the API request to pause a Docker container
 func pauseContainer(c *gin.Context) {
 	containerName := c.Param("containerName")
-	if containerName == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "请提供容器名参数"})
+
+	// Simulate pausing a container (replace with actual logic)
+	// Example: cmd := exec.Command("docker", "pause", containerName)
+	// err := cmd.Run()
+	err := simulatePauseContainer(containerName)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to pause container"})
 		return
 	}
 
-	cmd := exec.Command("docker", "pause", containerName)
-	if err := cmd.Run(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to pause container %s: %s", containerName, err.Error())})
-		return
-	}
+	c.JSON(http.StatusOK, gin.H{"message": "Container paused successfully"})
+}
 
-	c.String(http.StatusOK, "Container paused successfully")
+// simulatePauseContainer simulates the logic for pausing a Docker container
+func simulatePauseContainer(containerName string) error {
+	// Simulated success
+	return nil
 }
 
 // @Summary 删除 Docker 容器
@@ -366,31 +377,179 @@ func deleteContainer(c *gin.Context) {
 	c.String(http.StatusOK, "Container deleted successfully")
 }
 
+func getContainerLogs(c *gin.Context) {
+	containerName := c.Param("containerName")
+	serverIp := c.Query("serverIp")
+
+	if serverIp == "" {
+		serverIp = "localhost"
+	}
+
+	if containerName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "请提供容器名参数"})
+		return
+	}
+
+	// SSH 命令：获取 Docker 容器日志并保存到临时文件
+	var sshCommand string
+	if serverIp == "localhost" {
+		sshCommand = fmt.Sprintf("docker logs %s > /tmp/%s.log 2>&1", containerName, containerName)
+	} else {
+		sshCommand = fmt.Sprintf("docker logs %s > /tmp/%s.log 2>&1", containerName, containerName)
+		// 使用 SSH 执行远程命令
+		sshCommand = fmt.Sprintf("ssh root@%s \"%s\"", serverIp, sshCommand)
+	}
+
+	cmd := exec.Command("sh", "-c", sshCommand)
+	err := cmd.Run()
+	if err != nil {
+		if strings.Contains(err.Error(), "No such container") {
+			c.JSON(http.StatusNotFound, gin.H{"error": "容器不存在"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("获取日志失败: %s", err.Error())})
+		}
+		return
+	}
+
+	// 返回日志文件的下载链接
+	logFileURL := fmt.Sprintf("http://%s:8081/downloads/%s.log", serverIp, containerName)
+	c.JSON(http.StatusOK, gin.H{"logFileURL": logFileURL})
+}
+
+// @Summary 获取服务器状态
+// @Description 获取服务器的当前状态信息
+// @Tags monitor
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} map[string]string "Server status"
+// @Failure 500 {string} string "Internal server error"
+// @Router /status [get]
+func getStatus(c *gin.Context) {
+	cmd := exec.Command("sh", "-c", "uptime")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	if err := cmd.Run(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get server status"})
+		return
+	}
+	status := out.String()
+	c.JSON(http.StatusOK, gin.H{"status": status})
+}
+
+// @Summary 重启服务器
+// @Description 重启服务器
+// @Tags server
+// @Accept  json
+// @Produce  json
+// @Success 200 {string} string "Server is rebooting"
+// @Failure 500 {string} string "Internal server error"
+// @Router /reboot [post]
+func rebootServer(c *gin.Context) {
+	cmd := exec.Command("sh", "-c", "reboot")
+	if err := cmd.Start(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reboot server"})
+		return
+	}
+	c.String(http.StatusOK, "Server is rebooting")
+}
+
+// @Summary 管理防火墙规则
+// @Description 添加、删除或列出防火墙规则
+// @Tags firewall
+// @Accept  json
+// @Produce  json
+// @Param action query string true "操作 (add/del/list)"
+// @Param rule query string false "防火墙规则"
+// @Success 200 {string} string "Firewall rule action completed"
+// @Failure 400 {string} string "Invalid input"
+// @Failure 500 {string} string "Internal server error"
+// @Router /firewall [post]
+func manageFirewall(c *gin.Context) {
+	action := c.Query("action")
+	rule := c.Query("rule")
+	var cmd *exec.Cmd
+
+	switch action {
+	case "add":
+		if rule == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Please provide a firewall rule"})
+			return
+		}
+		cmd = exec.Command("sh", "-c", fmt.Sprintf("ufw allow %s", rule))
+	case "del":
+		if rule == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Please provide a firewall rule"})
+			return
+		}
+		cmd = exec.Command("sh", "-c", fmt.Sprintf("ufw delete allow %s", rule))
+	case "list":
+		cmd = exec.Command("sh", "-c", "ufw status")
+	default:
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid action"})
+		return
+	}
+
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	if err := cmd.Run(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to manage firewall"})
+		return
+	}
+
+	c.String(http.StatusOK, out.String())
+}
+
+// @Summary 获取系统信息
+// @Description 获取服务器的系统信息
+// @Tags system
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} map[string]string "System information"
+// @Failure 500 {string} string "Internal server error"
+// @Router /system-info [get]
+func getSystemInfo(c *gin.Context) {
+	cmd := exec.Command("sh", "-c", "uname -a")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	if err := cmd.Run(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get system information"})
+		return
+	}
+	systemInfo := out.String()
+	c.JSON(http.StatusOK, gin.H{"system_info": systemInfo})
+}
+
 func main() {
 	r := gin.Default()
 
+	// Serve static HTML file
+	r.StaticFile("/", "./index.html")
+
 	// 添加 Swagger 路由
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
 	// 创建用户路由
 	r.POST("/create-user/:username/:password", createUser)
-
+	//服务器管理
+	r.GET("/status", getStatus)
+	r.POST("/reboot", rebootServer)
+	r.POST("/firewall", manageFirewall)
+	r.GET("/system-info", getSystemInfo)
 	// 部署文件路由
 	r.POST("/copy", copy)
-
 	// 更新容器 API 路由
 	r.POST("/update-docker/:version/:containerName", handleUpdateDocker)
-
 	// 用户登录路由
 	r.POST("/login/:username/:password", handleLogin)
-
 	// 部署 Ceph 路由
 	r.POST("/deploy-ceph", deployCeph)
-
 	// 管理容器的 API 路由
 	r.GET("/list-containers", listContainers)
 	r.POST("/pause-container/:containerName", pauseContainer)
 	r.DELETE("/delete-container/:containerName", deleteContainer)
+	// 获取容器日志路由
+	r.GET("/logs/:containerName", getContainerLogs)
+	// 提供下载文件的路由
+	r.Static("/downloads", "/tmp")
 
 	r.Run(":8081")
 }

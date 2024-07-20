@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Management Interface</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .btn-block {
+            margin-bottom: 20px; /* 增加按钮之间的垂直间距 */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">API Management Interface</h1>
+
+        <div class="row">
+            <div class="col-md-4">
+                <button class="btn btn-primary btn-block" data-toggle="modal" data-target="#createUserModal">Create User</button>
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-primary btn-block" data-toggle="modal" data-target="#copyFilesModal">Deploy Files</button>
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-primary btn-block" data-toggle="modal" data-target="#updateDockerModal">Update Docker Container</button>
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-primary btn-block" data-toggle="modal" data-target="#listContainersModal">List Docker Containers</button>
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-primary btn-block" data-toggle="modal" data-target="#pauseContainerModal">Pause Docker Container</button>
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-danger btn-block" data-toggle="modal" data-target="#deleteContainerModal">Delete Docker Container</button>
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-info btn-block" data-toggle="modal" data-target="#getLogsModal">Get Container Logs</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create User Modal -->
+    <div class="modal fade" id="createUserModal" tabindex="-1" role="dialog" aria-labelledby="createUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createUserModalLabel">Create Linux User</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="createUserForm">
+                        <div class="form-group">
+                            <label for="createUserUsername">Username</label>
+                            <input type="text" class="form-control" id="createUserUsername" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="createUserPassword">Password</label>
+                            <input type="password" class="form-control" id="createUserPassword" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Create User</button>
+                    </form>
+                    <div id="createUserResult" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deploy Files Modal -->
+    <div class="modal fade" id="copyFilesModal" tabindex="-1" role="dialog" aria-labelledby="copyFilesModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="copyFilesModalLabel">Deploy Files to Server</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="copyForm">
+                        <div class="form-group">
+                            <label for="serverIps">Server IPs (comma separated)</label>
+                            <input type="text" class="form-control" id="serverIps" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="buildDir">Build Directory</label>
+                            <input type="text" class="form-control" id="buildDir">
+                        </div>
+                        <div class="form-group">
+                            <label for="buildCommand">Build Command</label>
+                            <input type="text" class="form-control" id="buildCommand">
+                        </div>
+                        <div class="form-group">
+                            <label for="buildOutputDir">Build Output Directory</label>
+                            <input type="text" class="form-control" id="buildOutputDir">
+                        </div>
+                        <div class="form-group">
+                            <label for="destinationPath">Destination Path</label>
+                            <input type="text" class="form-control" id="destinationPath">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Copy Files</button>
+                    </form>
+                    <div id="copyResult" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Docker Container Modal -->
+    <div class="modal fade" id="updateDockerModal" tabindex="-1" role="dialog" aria-labelledby="updateDockerModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateDockerModalLabel">Update Docker Container</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="updateDockerForm">
+                        <div class="form-group">
+                            <label for="dockerVersion">Version</label>
+                            <input type="text" class="form-control" id="dockerVersion" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="containerName">Container Name</label>
+                            <input type="text" class="form-control" id="containerName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="dockerServerIps">Server IPs (comma separated)</label>
+                            <input type="text" class="form-control" id="dockerServerIps" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Docker</button>
+                    </form>
+                    <div id="updateDockerResult" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- List Docker Containers Modal -->
+    <div class="modal fade" id="listContainersModal" tabindex="-1" role="dialog" aria-labelledby="listContainersModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="listContainersModalLabel">List Docker Containers</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <button id="listContainersButton" class="btn btn-primary btn-block">List Containers</button>
+                    <div id="listContainersResult" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pause Docker Container Modal -->
+    <div class="modal fade" id="pauseContainerModal" tabindex="-1" role="dialog" aria-labelledby="pauseContainerModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pauseContainerModalLabel">Pause Docker Container</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="pauseContainerForm">
+                        <div class="form-group">
+                            <label for="pauseContainerName">Container Name</label>
+                            <input type="text" class="form-control" id="pauseContainerName" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Pause Container</button>
+                    </form>
+                    <div id="pauseContainerResult" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Docker Container Modal -->
+    <div class="modal fade" id="deleteContainerModal" tabindex="-1" role="dialog" aria-labelledby="deleteContainerModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteContainerModalLabel">Delete Docker Container</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="deleteContainerForm">
+                        <div class="form-group">
+                            <label for="deleteContainerName">Container Name</label>
+                            <input type="text" class="form-control" id="deleteContainerName" required>
+                        </div>
+                        <button type="submit" class="btn btn-danger">Delete Container</button>
+                    </form>
+                    <div id="deleteContainerResult" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Get Logs Modal -->
+<div class="modal fade" id="getLogsModal" tabindex="-1" role="dialog" aria-labelledby="getLogsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="getLogsModalLabel">Get Container Logs</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="getLogsForm">
+                    <div class="form-group">
+                        <label for="logContainerName">Container Name</label>
+                        <input type="text" class="form-control" id="logContainerName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="logServerIp">Server IP (optional)</label>
+                        <input type="text" class="form-control" id="logServerIp">
+                    </div>
+                    <button type="submit" id="getLogsButton" class="btn btn-primary">Get Logs</button>
+                </form>
+                <div id="logResult" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Feedback Modal -->
+<div class="modal fade" id="feedbackModal" tabindex="-1" role="dialog" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="feedbackModalLabel">反馈</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="feedbackMessage">
+                <!-- 反馈消息将在这里插入 -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="confirmFeedbackButton">确认</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+// Create User
+$('#createUserForm').on('submit', function(event) {
+    event.preventDefault();
+    const username = $('#createUserUsername').val();
+    const password = $('#createUserPassword').val();
+    axios.post(`/create-user/${username}/${password}`)
+        .then(response => {
+            $('#createUserResult').text(response.data.message);
+        })
+        .catch(error => {
+            $('#createUserResult').text(error.response.data.error);
+        });
+});
+
+// Deploy Files
+$('#copyForm').on('submit', function(event) {
+    event.preventDefault();
+    const serverIps = $('#serverIps').val().split(',').map(ip => ip.trim());
+    const buildDir = $('#buildDir').val();
+    const buildCommand = $('#buildCommand').val();
+    const buildOutputDir = $('#buildOutputDir').val();
+    const destinationPath = $('#destinationPath').val();
+    axios.post('/copy', { serverIps, buildDir, buildCommand, buildOutputDir, destinationPath })
+        .then(response => {
+            $('#copyResult').text(response.data.message);
+        })
+        .catch(error => {
+            $('#copyResult').text(error.response.data.error);
+        });
+});
+
+// Update Docker Container
+$('#updateDockerForm').on('submit', function(event) {
+    event.preventDefault();
+    const version = $('#dockerVersion').val();
+    const containerName = $('#containerName').val();
+    const serverIps = $('#dockerServerIps').val().split(',').map(ip => ip.trim());
+    axios.post(`/update-docker/${version}/${containerName}`, { serverIps })
+        .then(response => {
+            $('#updateDockerResult').text(response.data.message);
+        })
+        .catch(error => {
+            $('#updateDockerResult').text(error.response.data.error);
+        });
+});
+
+// List Docker Containers
+$('#listContainersButton').on('click', function() {
+    axios.get('/list-containers')
+        .then(response => {
+            $('#listContainersResult').html('<pre>' + JSON.stringify(response.data, null, 2) + '</pre>');
+        })
+        .catch(error => {
+            $('#listContainersResult').text(error.response.data.error);
+        });
+});
+
+ // 暂停 Docker 容器
+ $('#pauseContainerForm').on('submit', function(event) {
+    event.preventDefault();
+    const containerName = $('#pauseContainerName').val();
+    axios.post(`/pause-container/${containerName}`)
+        .then(response => {
+            if (response.status === 200) {
+                // 返回200时，弹出成功提示框
+                $('#feedbackMessage').text('容器已成功暂停');
+                $('#feedbackModal').modal('show');
+                // 不重置表单在这里执行
+            }
+        })
+        .catch(error => {
+            if (error.response && error.response.status === 404) {
+                // 返回404时，弹出“容器不存在”提示框
+                $('#feedbackMessage').text('容器不存在');
+            } else {
+                // 其他错误处理
+                $('#feedbackMessage').text(error.response.data.error || '发生错误');
+            }
+            $('#feedbackModal').modal('show');
+            // 隐藏表单
+            $('#pauseContainerForm').hide();
+        });
+});
+
+// 绑定确认按钮点击事件
+$('#confirmFeedbackButton').on('click', function() {
+    // 关闭模态框
+    $('#feedbackModal').modal('hide');
+    // 显示表单
+    $('#pauseContainerForm').show();
+    // 重置表单
+    $('#pauseContainerForm')[0].reset();
+});
+
+
+// Delete Docker Container
+$('#deleteContainerForm').on('submit', function(event) {
+    event.preventDefault();
+    const containerName = $('#deleteContainerName').val();
+    axios.delete(`/delete-container/${containerName}`)
+        .then(response => {
+            $('#deleteContainerResult').text(response.data.message);
+        })
+        .catch(error => {
+            $('#deleteContainerResult').text(error.response.data.error);
+        });
+});
+
+// Get Logs
+$('#getLogsForm').on('submit', function(event) {
+    event.preventDefault();
+    const containerName = $('#logContainerName').val();
+    const serverIp = $('#logServerIp').val() || ''; // 如果为空，设置为空字符串
+    axios.get(`/logs/${containerName}`, { params: { serverIp } })
+        .then(response => {
+            const logFileURL = response.data.logFileURL;
+            $('#logResult').html(`
+                <p>Log file has been generated. You can download it from the following link:</p>
+                <a href="${logFileURL}" target="_blank">${logFileURL}</a>
+            `);
+        })
+        .catch(error => {
+            if (error.response.status === 404) {
+                $('#logResult').html(`<div class="alert alert-danger">Container not found</div>`);
+            } else {
+                $('#logResult').text(error.response.data.error);
+            }
+        });
+});
+
+
+</script>
+</body>
+</html>
