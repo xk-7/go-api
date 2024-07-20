@@ -77,7 +77,7 @@ paths:
       tags:
       - user
   /delete-container/{containerName}:
-    post:
+    delete:
       consumes:
       - application/json
       description: 删除指定名称的 Docker 容器

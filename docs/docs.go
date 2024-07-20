@@ -129,7 +129,7 @@ const docTemplate = `{
             }
         },
         "/delete-container/{containerName}": {
-            "post": {
+            "delete": {
                 "description": "删除指定名称的 Docker 容器",
                 "consumes": [
                     "application/json"

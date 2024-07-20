@@ -342,7 +342,7 @@ func pauseContainer(c *gin.Context) {
 // @Success 200 {string} string "Container deleted successfully"
 // @Failure 400 {string} string "Invalid input"
 // @Failure 500 {string} string "Internal server error"
-// @Router /delete-container/{containerName} [post]
+// @Router /delete-container/{containerName} [delete]
 func deleteContainer(c *gin.Context) {
 	containerName := c.Param("containerName")
 	if containerName == "" {
@@ -351,8 +351,9 @@ func deleteContainer(c *gin.Context) {
 	}
 
 	cmd := exec.Command("docker", "rm", "-f", containerName)
-	if err := cmd.Run(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to delete container %s: %s", containerName, err.Error())})
+	_, err := cmd.CombinedOutput()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("删除容器失败: %s", err.Error())})
 		return
 	}
 
@@ -383,7 +384,7 @@ func main() {
 	// 管理容器的 API 路由
 	r.GET("/list-containers", listContainers)
 	r.POST("/pause-container/:containerName", pauseContainer)
-	r.POST("/delete-container/:containerName", deleteContainer)
+	r.DELETE("/delete-container/:containerName", deleteContainer)
 
 	r.Run(":8081")
 }
