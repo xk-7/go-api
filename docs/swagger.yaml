@@ -1,0 +1,201 @@
+info:
+  contact: {}
+paths:
+  /copy/{version}:
+    post:
+      consumes:
+      - application/json
+      description: 将构建文件复制到服务器
+      parameters:
+      - description: 版本号
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: 服务器 IP 列表，以逗号分隔
+        in: query
+        name: serverIps
+        required: true
+        type: string
+      - description: 构建目录
+        in: query
+        name: buildDir
+        type: string
+      - description: 构建命令
+        in: query
+        name: buildCommand
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Files copied successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid input
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: 部署新版本到服务器
+      tags:
+      - deployment
+  /create-user/{username}/{password}:
+    post:
+      consumes:
+      - application/json
+      description: 创建一个新的 Linux 用户
+      parameters:
+      - description: 用户名
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: 密码
+        in: path
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User created successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid input
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: 创建 Linux 用户
+      tags:
+      - user
+  /deploy-ceph:
+    post:
+      consumes:
+      - application/json
+      description: 部署Ceph集群，包括节点设置、Ceph配置、OSD部署等
+      parameters:
+      - description: 节点名称列表
+        in: body
+        name: nodes
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      - description: 节点IP列表
+        in: body
+        name: nodeIPs
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      - description: OSD磁盘列表
+        in: body
+        name: osdDisks
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Ceph cluster deployed successfully
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: 部署Ceph集群
+      tags:
+      - ceph
+  /login/{username}/{password}:
+    post:
+      consumes:
+      - application/json
+      description: 验证用户登录信息
+      parameters:
+      - description: 用户名
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: 密码
+        in: path
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            type: string
+        "400":
+          description: Invalid input
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: 用户登录
+      tags:
+      - authentication
+  /start-docker/{version}/{containerName}:
+    post:
+      consumes:
+      - application/json
+      description: 在目标服务器上运行 Docker 容器
+      parameters:
+      - description: 版本号
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: Docker 容器名
+        in: path
+        name: containerName
+        required: true
+        type: string
+      - description: 服务器 IP 列表，以逗号分隔
+        in: query
+        name: serverIps
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Docker containers started successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid input
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: 启动 Docker 容器
+      tags:
+      - docker
+swagger: "2.0"
