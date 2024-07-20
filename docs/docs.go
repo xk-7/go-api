@@ -128,6 +128,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/delete-container/{containerName}": {
+            "post": {
+                "description": "删除指定名称的 Docker 容器",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "docker"
+                ],
+                "summary": "删除 Docker 容器",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Docker 容器名",
+                        "name": "containerName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Container deleted successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/deploy-ceph": {
             "post": {
                 "description": "部署Ceph集群，包括节点设置、Ceph配置、OSD部署等",
@@ -155,18 +199,6 @@ const docTemplate = `{
                         }
                     },
                     {
-                        "description": "节点IP列表",
-                        "name": "nodeIPs",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    {
                         "description": "OSD磁盘列表",
                         "name": "osdDisks",
                         "in": "body",
@@ -184,6 +216,39 @@ const docTemplate = `{
                         "description": "Ceph cluster deployed successfully",
                         "schema": {
                             "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/list-containers": {
+            "get": {
+                "description": "列出当前所有 Docker 容器的详细信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "docker"
+                ],
+                "summary": "列出所有 Docker 容器",
+                "responses": {
+                    "200": {
+                        "description": "List of Docker containers",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": true
+                            }
                         }
                     },
                     "500": {
@@ -252,7 +317,51 @@ const docTemplate = `{
                 }
             }
         },
-        "/start-docker/{version}/{containerName}": {
+        "/pause-container/{containerName}": {
+            "post": {
+                "description": "暂停指定名称的 Docker 容器",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "docker"
+                ],
+                "summary": "暂停 Docker 容器",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Docker 容器名",
+                        "name": "containerName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Container paused successfully",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/update-docker/{version}/{containerName}": {
             "post": {
                 "description": "在目标服务器上运行 Docker 容器",
                 "consumes": [
@@ -264,7 +373,7 @@ const docTemplate = `{
                 "tags": [
                     "docker"
                 ],
-                "summary": "启动 Docker 容器",
+                "summary": "更新容器 API",
                 "parameters": [
                     {
                         "type": "string",

@@ -76,6 +76,35 @@ paths:
       summary: 创建 Linux 用户
       tags:
       - user
+  /delete-container/{containerName}:
+    post:
+      consumes:
+      - application/json
+      description: 删除指定名称的 Docker 容器
+      parameters:
+      - description: Docker 容器名
+        in: path
+        name: containerName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Container deleted successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid input
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: 删除 Docker 容器
+      tags:
+      - docker
   /deploy-ceph:
     post:
       consumes:
@@ -85,14 +114,6 @@ paths:
       - description: 节点名称列表
         in: body
         name: nodes
-        required: true
-        schema:
-          items:
-            type: string
-          type: array
-      - description: 节点IP列表
-        in: body
-        name: nodeIPs
         required: true
         schema:
           items:
@@ -120,6 +141,28 @@ paths:
       summary: 部署Ceph集群
       tags:
       - ceph
+  /list-containers:
+    get:
+      consumes:
+      - application/json
+      description: 列出当前所有 Docker 容器的详细信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of Docker containers
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: 列出所有 Docker 容器
+      tags:
+      - docker
   /login/{username}/{password}:
     post:
       consumes:
@@ -158,7 +201,36 @@ paths:
       summary: 用户登录
       tags:
       - authentication
-  /start-docker/{version}/{containerName}:
+  /pause-container/{containerName}:
+    post:
+      consumes:
+      - application/json
+      description: 暂停指定名称的 Docker 容器
+      parameters:
+      - description: Docker 容器名
+        in: path
+        name: containerName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Container paused successfully
+          schema:
+            type: string
+        "400":
+          description: Invalid input
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: 暂停 Docker 容器
+      tags:
+      - docker
+  /update-docker/{version}/{containerName}:
     post:
       consumes:
       - application/json
@@ -194,7 +266,7 @@ paths:
           description: Internal server error
           schema:
             type: string
-      summary: 启动 Docker 容器
+      summary: 更新容器 API
       tags:
       - docker
 swagger: "2.0"

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os/exec"
@@ -118,7 +120,7 @@ func copy(c *gin.Context) {
 	c.String(http.StatusOK, "Files copied successfully")
 }
 
-// @Summary 启动 Docker 容器
+// @Summary 更新容器 API
 // @Description 在目标服务器上运行 Docker 容器
 // @Tags docker
 // @Accept  json
@@ -129,8 +131,8 @@ func copy(c *gin.Context) {
 // @Success 200 {string} string "Docker containers started successfully"
 // @Failure 400 {string} string "Invalid input"
 // @Failure 500 {string} string "Internal server error"
-// @Router /start-docker/{version}/{containerName} [post]
-func handleStartDocker(c *gin.Context) {
+// @Router /update-docker/{version}/{containerName} [post]
+func handleUpdateDocker(c *gin.Context) {
 	version := c.Param("version")
 	containerName := c.Param("containerName")
 	if version == "" || containerName == "" {
@@ -211,7 +213,6 @@ func handleLogin(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param nodes body []string true "节点名称列表"
-// @Param nodeIPs body []string true "节点IP列表"
 // @Param osdDisks body []string true "OSD磁盘列表"
 // @Success 200 {string} string "Ceph cluster deployed successfully"
 // @Failure 500 {string} string "Internal server error"
@@ -219,7 +220,6 @@ func handleLogin(c *gin.Context) {
 func deployCeph(c *gin.Context) {
 	var requestData struct {
 		Nodes    []string `json:"nodes"`
-		NodeIPs  []string `json:"nodeIPs"`
 		OSDDisks []string `json:"osdDisks"`
 	}
 
@@ -229,157 +229,161 @@ func deployCeph(c *gin.Context) {
 	}
 
 	nodes := requestData.Nodes
-	nodeIPs := requestData.NodeIPs
 	osdDisks := requestData.OSDDisks
-	fsid := "some-generated-uuid" // Generate or set your FSID here
 
-	// 更新和安装依赖
-	for _, node := range nodes {
-		cmd := exec.Command("sh", "-c", fmt.Sprintf("ssh root@%s 'apt update && apt upgrade -y'", node))
-		if output, err := cmd.CombinedOutput(); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to update node %s: %s", node, string(output))})
-			return
-		}
-		cmd = exec.Command("sh", "-c", fmt.Sprintf("ssh root@%s 'apt install -y ntp ssh ceph-deploy'", node))
-		if output, err := cmd.CombinedOutput(); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to install dependencies on node %s: %s", node, string(output))})
-			return
-		}
+	// 更新和安装 ceph-deploy
+	updateAndInstallCephDeploy := "apt-get update && apt-get install -y ceph-deploy"
+	if err := exec.Command("sh", "-c", updateAndInstallCephDeploy).Run(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update and install ceph-deploy"})
+		return
 	}
 
-	// 设置主机名和hosts文件
+	// 创建集群目录
+	clusterDir := "my-cluster"
+	if err := exec.Command("sh", "-c", fmt.Sprintf("mkdir %s", clusterDir)).Run(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create cluster directory"})
+		return
+	}
+
+	// 部署监视器和管理器
+	monitorAndManager := fmt.Sprintf("cd %s && ceph-deploy new %s", clusterDir, strings.Join(nodes, " "))
+	if err := exec.Command("sh", "-c", monitorAndManager).Run(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to deploy monitor and manager"})
+		return
+	}
+
+	// 配置 Ceph
+	configCeph := fmt.Sprintf("cd %s && ceph-deploy install %s && ceph-deploy mon create-initial", clusterDir, strings.Join(nodes, " "))
+	if err := exec.Command("sh", "-c", configCeph).Run(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to configure Ceph"})
+		return
+	}
+
+	// 部署 OSD
 	for i, node := range nodes {
-		nodeIP := nodeIPs[i]
-		cmd := exec.Command("sh", "-c", fmt.Sprintf("ssh root@%s 'hostnamectl set-hostname %s'", node, node))
-		if output, err := cmd.CombinedOutput(); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to set hostname on node %s: %s", node, string(output))})
+		deployOSD := fmt.Sprintf("cd %s && ceph-deploy osd create --data %s %s", clusterDir, osdDisks[i], node)
+		if err := exec.Command("sh", "-c", deployOSD).Run(); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to deploy OSD on node %s", node)})
 			return
 		}
-		cmd = exec.Command("sh", "-c", fmt.Sprintf("ssh root@%s 'echo \"%s %s\" >> /etc/hosts'", node, nodeIP, node))
-		if output, err := cmd.CombinedOutput(); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to update /etc/hosts on node %s: %s", node, string(output))})
-			return
-		}
-		for j, otherNode := range nodes {
-			if i != j {
-				otherIP := nodeIPs[j]
-				cmd = exec.Command("sh", "-c", fmt.Sprintf("ssh root@%s 'echo \"%s %s\" >> /etc/hosts'", node, otherIP, otherNode))
-				if output, err := cmd.CombinedOutput(); err != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to update /etc/hosts with %s on node %s: %s", otherNode, node, string(output))})
-					return
-				}
-			}
-		}
-	}
-
-	// 安装Ceph
-	for _, node := range nodes {
-		cmd := exec.Command("sh", "-c", fmt.Sprintf("ssh root@%s 'wget -q -O- \"https://download.ceph.com/keys/release.asc\" | apt-key add -'", node))
-		if output, err := cmd.CombinedOutput(); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to add Ceph key on node %s: %s", node, string(output))})
-			return
-		}
-		cmd = exec.Command("sh", "-c", fmt.Sprintf("ssh root@%s 'echo deb https://mirrors.aliyun.com/ceph/debian-18.2.0 $(lsb_release -sc) main | tee /etc/apt/sources.list.d/ceph.list'", node))
-		if output, err := cmd.CombinedOutput(); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to add Ceph repository on node %s: %s", node, string(output))})
-			return
-		}
-		cmd = exec.Command("sh", "-c", fmt.Sprintf("ssh root@%s 'apt update && apt install -y ceph'", node))
-		if output, err := cmd.CombinedOutput(); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to install Ceph on node %s: %s", node, string(output))})
-			return
-		}
-	}
-
-	// 创建部署目录
-	cmd := exec.Command("sh", "-c", "mkdir -p ~/ceph-cluster && cd ~/ceph-cluster")
-	if output, err := cmd.CombinedOutput(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to create deployment directory: %s", string(output))})
-		return
-	}
-
-	// 创建Ceph配置文件和密钥
-	cmd = exec.Command("sh", "-c", fmt.Sprintf("echo \"[global]\nfsid = %s\nmon initial members = %s\nmon host = %s\npublic network = 192.168.100.0/24\ncluster network = 192.168.100.0/24\nauth cluster required = cephx\nauth service required = cephx\nauth client required = cephx\nosd journal size = 1024\nosd pool default size = 3\nosd pool default min size = 2\nosd pool default pg num = 128\nosd pool default pgp num = 128\nosd crush chooseleaf type = 1\" > ceph.conf", fsid, strings.Join(nodes, ", "), strings.Join(nodeIPs, ", ")))
-	if output, err := cmd.CombinedOutput(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to create Ceph configuration file: %s", string(output))})
-		return
-	}
-
-	// 部署monitor节点
-	cmd = exec.Command("sh", "-c", "ceph-deploy mon create-initial")
-	if output, err := cmd.CombinedOutput(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to deploy monitor node: %s", string(output))})
-		return
-	}
-
-	// 部署OSD节点
-	for _, node := range nodes {
-		cmd = exec.Command("sh", "-c", fmt.Sprintf("ceph-deploy disk zap %s %s", node, strings.Join(osdDisks, " ")))
-		if output, err := cmd.CombinedOutput(); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to zap disks on node %s: %s", node, string(output))})
-			return
-		}
-		cmd = exec.Command("sh", "-c", fmt.Sprintf("ceph-deploy osd create %s %s", node, strings.Join(osdDisks, " ")))
-		if output, err := cmd.CombinedOutput(); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to create OSD on node %s: %s", node, string(output))})
-			return
-		}
-	}
-
-	// 部署Manager
-	cmd = exec.Command("sh", "-c", fmt.Sprintf("ceph-deploy mgr create %s", strings.Join(nodes, " ")))
-	if output, err := cmd.CombinedOutput(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to deploy Manager: %s", string(output))})
-		return
-	}
-
-	// 检查集群状态
-	cmd = exec.Command("sh", "-c", "ceph -s")
-	if output, err := cmd.CombinedOutput(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to check Ceph cluster status: %s", string(output))})
-		return
-	}
-
-	// 部署MDS（仅适用于CephFS）
-	cmd = exec.Command("sh", "-c", fmt.Sprintf("ceph-deploy mds create %s", strings.Join(nodes, " ")))
-	if output, err := cmd.CombinedOutput(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to deploy MDS: %s", string(output))})
-		return
-	}
-
-	// 创建CephFS
-	cmd = exec.Command("sh", "-c", "ceph osd pool create cephfs_data 128")
-	if output, err := cmd.CombinedOutput(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to create cephfs_data pool: %s", string(output))})
-		return
-	}
-	cmd = exec.Command("sh", "-c", "ceph osd pool create cephfs_metadata 128")
-	if output, err := cmd.CombinedOutput(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to create cephfs_metadata pool: %s", string(output))})
-		return
-	}
-	cmd = exec.Command("sh", "-c", "ceph fs new cephfs cephfs_metadata cephfs_data")
-	if output, err := cmd.CombinedOutput(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to create CephFS: %s", string(output))})
-		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Ceph cluster deployed successfully"})
 }
 
+// @Summary 列出所有 Docker 容器
+// @Description 列出当前所有 Docker 容器的详细信息
+// @Tags docker
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} []map[string]interface{} "List of Docker containers"
+// @Failure 500 {string} string "Internal server error"
+// @Router /list-containers [get]
+func listContainers(c *gin.Context) {
+	cmd := exec.Command("docker", "ps", "--format", "{{json .}}")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	if err := cmd.Run(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list Docker containers"})
+		return
+	}
+
+	lines := strings.Split(out.String(), "\n")
+	var containers []map[string]interface{}
+	for _, line := range lines {
+		if line == "" {
+			continue
+		}
+
+		var container map[string]interface{}
+		if err := json.Unmarshal([]byte(line), &container); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse Docker container output"})
+			return
+		}
+
+		containers = append(containers, container)
+	}
+
+	c.JSON(http.StatusOK, containers)
+}
+
+// @Summary 暂停 Docker 容器
+// @Description 暂停指定名称的 Docker 容器
+// @Tags docker
+// @Accept  json
+// @Produce  json
+// @Param containerName path string true "Docker 容器名"
+// @Success 200 {string} string "Container paused successfully"
+// @Failure 400 {string} string "Invalid input"
+// @Failure 500 {string} string "Internal server error"
+// @Router /pause-container/{containerName} [post]
+func pauseContainer(c *gin.Context) {
+	containerName := c.Param("containerName")
+	if containerName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "请提供容器名参数"})
+		return
+	}
+
+	cmd := exec.Command("docker", "pause", containerName)
+	if err := cmd.Run(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to pause container %s: %s", containerName, err.Error())})
+		return
+	}
+
+	c.String(http.StatusOK, "Container paused successfully")
+}
+
+// @Summary 删除 Docker 容器
+// @Description 删除指定名称的 Docker 容器
+// @Tags docker
+// @Accept  json
+// @Produce  json
+// @Param containerName path string true "Docker 容器名"
+// @Success 200 {string} string "Container deleted successfully"
+// @Failure 400 {string} string "Invalid input"
+// @Failure 500 {string} string "Internal server error"
+// @Router /delete-container/{containerName} [post]
+func deleteContainer(c *gin.Context) {
+	containerName := c.Param("containerName")
+	if containerName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "请提供容器名参数"})
+		return
+	}
+
+	cmd := exec.Command("docker", "rm", "-f", containerName)
+	if err := cmd.Run(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Failed to delete container %s: %s", containerName, err.Error())})
+		return
+	}
+
+	c.String(http.StatusOK, "Container deleted successfully")
+}
+
 func main() {
 	r := gin.Default()
 
-	// Swagger 文档路由
+	// 添加 Swagger 路由
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// API 路由
-	r.POST("/create-user/:username/:password", createUser)             // 创建用户路由
-	r.POST("/copy", copy)                                              // 文件部署路由
-	r.POST("/start-docker/:version/:containerName", handleStartDocker) // Docker 启动路由
-	r.POST("/login/:username/:password", handleLogin)                  // 登录路由
+	// 创建用户路由
+	r.POST("/create-user/:username/:password", createUser)
+
+	// 部署文件路由
+	r.POST("/copy", copy)
+
+	// 更新容器 API 路由
+	r.POST("/update-docker/:version/:containerName", handleUpdateDocker)
+
+	// 用户登录路由
+	r.POST("/login/:username/:password", handleLogin)
+
+	// 部署 Ceph 路由
 	r.POST("/deploy-ceph", deployCeph)
 
-	// 监听 8081 端口
+	// 管理容器的 API 路由
+	r.GET("/list-containers", listContainers)
+	r.POST("/pause-container/:containerName", pauseContainer)
+	r.POST("/delete-container/:containerName", deleteContainer)
+
 	r.Run(":8081")
 }
