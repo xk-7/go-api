@@ -1,17 +1,12 @@
 info:
   contact: {}
 paths:
-  /copy/{version}:
+  /copy:
     post:
       consumes:
       - application/json
       description: 将构建文件复制到服务器
       parameters:
-      - description: 版本号
-        in: path
-        name: version
-        required: true
-        type: string
       - description: 服务器 IP 列表，以逗号分隔
         in: query
         name: serverIps
@@ -24,6 +19,10 @@ paths:
       - description: 构建命令
         in: query
         name: buildCommand
+        type: string
+      - description: 构建输出目录
+        in: query
+        name: buildOutputDir
         type: string
       produces:
       - application/json
@@ -40,7 +39,7 @@ paths:
           description: Internal server error
           schema:
             type: string
-      summary: 部署新版本到服务器
+      summary: 部署文件到服务器
       tags:
       - deployment
   /create-user/{username}/{password}:

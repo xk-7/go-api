@@ -53,26 +53,20 @@ func createUser(c *gin.Context) {
 	c.String(http.StatusOK, "User created successfully")
 }
 
-// @Summary 部署新版本到服务器
+// @Summary 部署文件到服务器
 // @Description 将构建文件复制到服务器
 // @Tags deployment
 // @Accept  json
 // @Produce  json
-// @Param version path string true "版本号"
 // @Param serverIps query string true "服务器 IP 列表，以逗号分隔"
 // @Param buildDir query string false "构建目录"
 // @Param buildCommand query string false "构建命令"
+// @Param buildOutputDir query string false "构建输出目录"
 // @Success 200 {string} string "Files copied successfully"
 // @Failure 400 {string} string "Invalid input"
 // @Failure 500 {string} string "Internal server error"
-// @Router /copy/{version} [post]
+// @Router /copy [post]
 func copy(c *gin.Context) {
-	version := c.Param("version")
-	if version == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "请提供版本号参数"})
-		return
-	}
-
 	serverIps := c.Query("serverIps")
 	if serverIps == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "请提供服务器 IP 参数"})
@@ -89,6 +83,11 @@ func copy(c *gin.Context) {
 		buildCommand = "pnpm build:prod-https" // 默认值
 	}
 
+	buildOutputDir := c.Query("buildOutputDir")
+	if buildOutputDir == "" {
+		buildOutputDir = fmt.Sprintf("%s/prod-https", buildDir) // 默认值
+	}
+
 	// 将 IP 列表拆分为字符串数组
 	servers := strings.Split(serverIps, ",")
 
@@ -100,9 +99,6 @@ func copy(c *gin.Context) {
 		return
 	}
 
-	// 设置构建后的目录
-	prodDir := fmt.Sprintf("%s/prod-https", buildDir)
-
 	for _, server := range servers {
 		server = strings.TrimSpace(server)
 		if server == "" {
@@ -110,7 +106,7 @@ func copy(c *gin.Context) {
 		}
 
 		// 复制文件到服务器
-		scpCommand := fmt.Sprintf("scp -r %s/* root@%s:/home/sqray/cultures", prodDir, server)
+		scpCommand := fmt.Sprintf("scp -r %s/* root@%s:/home/sqray/cultures", buildOutputDir, server)
 		cmd = exec.Command("sh", "-c", scpCommand)
 		_, err := cmd.CombinedOutput()
 		if err != nil {
@@ -379,7 +375,7 @@ func main() {
 
 	// API 路由
 	r.POST("/create-user/:username/:password", createUser)             // 创建用户路由
-	r.POST("/copy/:version", copy)                                     // 文件部署路由
+	r.POST("/copy", copy)                                              // 文件部署路由
 	r.POST("/start-docker/:version/:containerName", handleStartDocker) // Docker 启动路由
 	r.POST("/login/:username/:password", handleLogin)                  // 登录路由
 	r.POST("/deploy-ceph", deployCeph)

@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/copy/{version}": {
+        "/copy": {
             "post": {
                 "description": "将构建文件复制到服务器",
                 "consumes": [
@@ -27,15 +27,8 @@ const docTemplate = `{
                 "tags": [
                     "deployment"
                 ],
-                "summary": "部署新版本到服务器",
+                "summary": "部署文件到服务器",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "版本号",
-                        "name": "version",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "type": "string",
                         "description": "服务器 IP 列表，以逗号分隔",
@@ -53,6 +46,12 @@ const docTemplate = `{
                         "type": "string",
                         "description": "构建命令",
                         "name": "buildCommand",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "构建输出目录",
+                        "name": "buildOutputDir",
                         "in": "query"
                     }
                 ],
@@ -317,14 +316,13 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "",
-	Host:             "localhost",
+	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "",
 	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
-
 }
 
 func init() {
