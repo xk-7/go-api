@@ -8,7 +8,7 @@ import (
 	"os/exec"
 	"strings"
 
-	_ "go-api-server/docs" // 导入 Swagger 文档模块
+	_ "go-api/docs" // 导入 Swagger 文档模块
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -436,23 +436,6 @@ func getStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": status})
 }
 
-// @Summary 重启服务器
-// @Description 重启服务器
-// @Tags server
-// @Accept  json
-// @Produce  json
-// @Success 200 {string} string "Server is rebooting"
-// @Failure 500 {string} string "Internal server error"
-// @Router /reboot [post]
-func rebootServer(c *gin.Context) {
-	cmd := exec.Command("sh", "-c", "reboot")
-	if err := cmd.Start(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reboot server"})
-		return
-	}
-	c.String(http.StatusOK, "Server is rebooting")
-}
-
 // @Summary 管理防火墙规则
 // @Description 添加、删除或列出防火墙规则
 // @Tags firewall
@@ -496,7 +479,7 @@ func manageFirewall(c *gin.Context) {
 		return
 	}
 
-	c.String(http.StatusOK, out.String())
+	c.JSON(http.StatusOK, gin.H{"message": out.String()})
 }
 
 // @Summary 获取系统信息
@@ -531,7 +514,6 @@ func main() {
 	r.POST("/create-user/:username/:password", createUser)
 	//服务器管理
 	r.GET("/status", getStatus)
-	r.POST("/reboot", rebootServer)
 	r.POST("/firewall", manageFirewall)
 	r.GET("/system-info", getSystemInfo)
 	// 部署文件路由

@@ -145,6 +145,39 @@ paths:
       summary: 部署Ceph集群
       tags:
       - ceph
+  /firewall:
+    post:
+      consumes:
+      - application/json
+      description: 添加、删除或列出防火墙规则
+      parameters:
+      - description: 操作 (add/del/list)
+        in: query
+        name: action
+        required: true
+        type: string
+      - description: 防火墙规则
+        in: query
+        name: rule
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Firewall rule action completed
+          schema:
+            type: string
+        "400":
+          description: Invalid input
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: 管理防火墙规则
+      tags:
+      - firewall
   /list-containers:
     get:
       consumes:
@@ -234,6 +267,67 @@ paths:
       summary: 暂停 Docker 容器
       tags:
       - docker
+  /reboot:
+    post:
+      consumes:
+      - application/json
+      description: 重启服务器
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Server is rebooting
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: 重启服务器
+      tags:
+      - server
+  /status:
+    get:
+      consumes:
+      - application/json
+      description: 获取服务器的当前状态信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Server status
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: 获取服务器状态
+      tags:
+      - monitor
+  /system-info:
+    get:
+      consumes:
+      - application/json
+      description: 获取服务器的系统信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: System information
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: 获取系统信息
+      tags:
+      - system
   /update-docker/{version}/{containerName}:
     post:
       consumes:
