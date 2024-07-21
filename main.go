@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -377,6 +378,7 @@ func deleteContainer(c *gin.Context) {
 	c.String(http.StatusOK, "Container deleted successfully")
 }
 
+// 获取容器日志
 func getContainerLogs(c *gin.Context) {
 	containerName := c.Param("containerName")
 	serverIp := c.Query("serverIp")
@@ -502,6 +504,81 @@ func getSystemInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"system_info": systemInfo})
 }
 
+// @Summary 获取服务器磁盘使用情况
+// @Description 获取服务器的磁盘使用情况
+// @Tags system
+// @Produce  json
+// @Success 200 {string} string "Disk usage information"
+// @Failure 500 {string} string "Internal server error"
+// @Router /disk-usage [get]
+func getDiskUsage(c *gin.Context) {
+	cmd := exec.Command("df", "-h")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	if err := cmd.Run(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get disk usage"})
+		return
+	}
+
+	c.String(http.StatusOK, out.String())
+}
+
+// @Summary 获取系统负载信息
+// @Description 获取系统负载信息
+// @Tags system
+// @Produce  json
+// @Success 200 {string} string "Load average information"
+// @Failure 500 {string} string "Internal server error"
+// @Router /load [get]
+func getLoad(c *gin.Context) {
+	cmd := exec.Command("uptime")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	if err := cmd.Run(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get system load"})
+		return
+	}
+
+	c.String(http.StatusOK, out.String())
+}
+
+// @Summary 获取系统内存使用情况
+// @Description 获取系统的内存使用情况
+// @Tags system
+// @Produce  json
+// @Success 200 {string} string "Memory usage information"
+// @Failure 500 {string} string "Internal server error"
+// @Router /memory-usage [get]
+func getMemoryUsage(c *gin.Context) {
+	cmd := exec.Command("free", "-h")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	if err := cmd.Run(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get memory usage"})
+		return
+	}
+
+	c.String(http.StatusOK, out.String())
+}
+
+// @Summary 获取系统日志
+// @Description 获取系统日志文件
+// @Tags system
+// @Produce  json
+// @Success 200 {string} string "System log content"
+// @Failure 500 {string} string "Internal server error"
+// @Router /logs [get]
+func getLogs(c *gin.Context) {
+	logFile := "/var/log/syslog" // 你可以更改为实际的日志文件路径
+	data, err := os.ReadFile(logFile)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read log file"})
+		return
+	}
+
+	c.String(http.StatusOK, string(data))
+}
+
 func main() {
 	r := gin.Default()
 
@@ -516,6 +593,10 @@ func main() {
 	r.GET("/status", getStatus)
 	r.POST("/firewall", manageFirewall)
 	r.GET("/system-info", getSystemInfo)
+	r.GET("/disk-usage", getDiskUsage)
+	r.GET("/load", getLoad)
+	r.GET("/memory-usage", getMemoryUsage)
+	r.GET("/logs", getLogs)
 	// 部署文件路由
 	r.POST("/copy", copy)
 	// 更新容器 API 路由

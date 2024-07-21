@@ -233,6 +233,32 @@ const docTemplate = `{
                 }
             }
         },
+        "/disk-usage": {
+            "get": {
+                "description": "获取服务器的磁盘使用情况",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "system"
+                ],
+                "summary": "获取服务器磁盘使用情况",
+                "responses": {
+                    "200": {
+                        "description": "Disk usage information",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/firewall": {
             "post": {
                 "description": "添加、删除或列出防火墙规则",
@@ -316,6 +342,32 @@ const docTemplate = `{
                 }
             }
         },
+        "/load": {
+            "get": {
+                "description": "获取系统负载信息",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "system"
+                ],
+                "summary": "获取系统负载信息",
+                "responses": {
+                    "200": {
+                        "description": "Load average information",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/login/{username}/{password}": {
             "post": {
                 "description": "验证用户登录信息",
@@ -373,6 +425,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/logs": {
+            "get": {
+                "description": "获取系统日志文件",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "system"
+                ],
+                "summary": "获取系统日志",
+                "responses": {
+                    "200": {
+                        "description": "System log content",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/memory-usage": {
+            "get": {
+                "description": "获取系统的内存使用情况",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "system"
+                ],
+                "summary": "获取系统内存使用情况",
+                "responses": {
+                    "200": {
+                        "description": "Memory usage information",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/pause-container/{containerName}": {
             "post": {
                 "description": "暂停指定名称的 Docker 容器",
@@ -404,35 +508,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid input",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/reboot": {
-            "post": {
-                "description": "重启服务器",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "server"
-                ],
-                "summary": "重启服务器",
-                "responses": {
-                    "200": {
-                        "description": "Server is rebooting",
                         "schema": {
                             "type": "string"
                         }

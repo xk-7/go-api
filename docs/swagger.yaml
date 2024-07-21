@@ -145,6 +145,23 @@ paths:
       summary: 部署Ceph集群
       tags:
       - ceph
+  /disk-usage:
+    get:
+      description: 获取服务器的磁盘使用情况
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Disk usage information
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: 获取服务器磁盘使用情况
+      tags:
+      - system
   /firewall:
     post:
       consumes:
@@ -200,6 +217,23 @@ paths:
       summary: 列出所有 Docker 容器
       tags:
       - docker
+  /load:
+    get:
+      description: 获取系统负载信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Load average information
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: 获取系统负载信息
+      tags:
+      - system
   /login/{username}/{password}:
     post:
       consumes:
@@ -238,6 +272,40 @@ paths:
       summary: 用户登录
       tags:
       - authentication
+  /logs:
+    get:
+      description: 获取系统日志文件
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: System log content
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: 获取系统日志
+      tags:
+      - system
+  /memory-usage:
+    get:
+      description: 获取系统的内存使用情况
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Memory usage information
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: 获取系统内存使用情况
+      tags:
+      - system
   /pause-container/{containerName}:
     post:
       consumes:
@@ -267,25 +335,6 @@ paths:
       summary: 暂停 Docker 容器
       tags:
       - docker
-  /reboot:
-    post:
-      consumes:
-      - application/json
-      description: 重启服务器
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Server is rebooting
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      summary: 重启服务器
-      tags:
-      - server
   /status:
     get:
       consumes:
