@@ -16,7 +16,7 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/copy": {
-            "post": {
+            "get": {
                 "description": "将构建文件复制到服务器",
                 "consumes": [
                     "application/json"

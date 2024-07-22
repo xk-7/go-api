@@ -2,7 +2,7 @@ info:
   contact: {}
 paths:
   /copy:
-    post:
+    get:
       consumes:
       - application/json
       description: 将构建文件复制到服务器

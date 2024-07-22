@@ -75,7 +75,7 @@ func createUser(c *gin.Context) {
 // @Success 200 {string} string "Files copied successfully"
 // @Failure 400 {string} string "Invalid input"
 // @Failure 500 {string} string "Internal server error"
-// @Router /copy [post]
+// @Router /copy [get]
 func copy(c *gin.Context) {
 	serverIps := c.Query("serverIps")
 	if serverIps == "" {
@@ -84,18 +84,11 @@ func copy(c *gin.Context) {
 	}
 
 	buildDir := c.Query("buildDir")
-	if buildDir == "" {
-		buildDir = "/root/dockerdata/jenkins/workspace/cell2.0" // 默认值
-	}
-
 	buildCommand := c.Query("buildCommand")
-	if buildCommand == "" {
-		buildCommand = "pnpm build:prod-https" // 默认值
-	}
-
 	buildOutputDir := c.Query("buildOutputDir")
 	if buildOutputDir == "" {
-		buildOutputDir = fmt.Sprintf("%s/prod-https", buildDir) // 默认值
+		c.JSON(http.StatusBadRequest, gin.H{"error": "请提供构建输出目录参数"})
+		return
 	}
 
 	destinationPath := c.Query("destinationPath")
@@ -103,16 +96,16 @@ func copy(c *gin.Context) {
 		destinationPath = "/home/sqray/cultures" // 默认值
 	}
 
-	// 将 IP 列表拆分为字符串数组
 	servers := strings.Split(serverIps, ",")
 
-	// 执行构建命令并捕获输出日志
-	var buildOutput bytes.Buffer
-	cmd := exec.Command("sh", "-c", fmt.Sprintf("cd %s && %s", buildDir, buildCommand))
-	cmd.Stdout = &buildOutput
-	cmd.Stderr = &buildOutput
-	if err := cmd.Run(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("构建失败: %s", err.Error()), "log": buildOutput.String()})
+	if buildDir == "" && buildCommand == "" {
+		listFiles(c, buildOutputDir)
+		return
+	}
+
+	buildOutput, err := executeBuild(buildDir, buildCommand)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("构建失败: %s", err.Error()), "log": buildOutput})
 		return
 	}
 
@@ -122,9 +115,93 @@ func copy(c *gin.Context) {
 			continue
 		}
 
-		// 复制文件到服务器
-		scpCommand := fmt.Sprintf("scp -r %s/* root@%s:%s", buildOutputDir, server, destinationPath)
-		cmd = exec.Command("sh", "-c", scpCommand)
+		err := copyFilesToServer(buildOutputDir, server, destinationPath)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("文件复制到 %s 失败: %s", server, err.Error())})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Files copied successfully", "log": buildOutput})
+}
+
+func listFiles(c *gin.Context, buildOutputDir string) {
+	files, err := os.ReadDir(buildOutputDir)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("读取目录失败: %s", err.Error())})
+		return
+	}
+
+	var fileList []string
+	for _, file := range files {
+		if !file.IsDir() {
+			fileList = append(fileList, file.Name())
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"files": fileList})
+}
+
+func executeBuild(buildDir, buildCommand string) (string, error) {
+	var buildOutput bytes.Buffer
+	cmd := exec.Command("sh", "-c", fmt.Sprintf("cd %s && %s", buildDir, buildCommand))
+	cmd.Stdout = &buildOutput
+	cmd.Stderr = &buildOutput
+	err := cmd.Run()
+	return buildOutput.String(), err
+}
+
+func copyFilesToServer(buildOutputDir, server, destinationPath string) error {
+	scpCommand := fmt.Sprintf("scp -r %s/* root@%s:%s", buildOutputDir, server, destinationPath)
+	cmd := exec.Command("sh", "-c", scpCommand)
+	var scpOutput bytes.Buffer
+	cmd.Stdout = &scpOutput
+	cmd.Stderr = &scpOutput
+	err := cmd.Run()
+	return err
+}
+
+func copyFile(c *gin.Context) {
+	var params struct {
+		ServerIps       string `json:"serverIps"`
+		FilePath        string `json:"filePath"`
+		DestinationPath string `json:"destinationPath"`
+	}
+
+	if err := c.BindJSON(&params); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "请求参数无效"})
+		return
+	}
+
+	serverIps := "192.168.100.6"
+	filePath := params.FilePath
+	destinationPath := params.DestinationPath
+
+	if serverIps == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "请提供服务器 IP 参数"})
+		return
+	}
+
+	if filePath == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "请提供文件路径参数"})
+		return
+	}
+
+	if destinationPath == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "请提供目标路径参数"})
+		return
+	}
+
+	servers := strings.Split(serverIps, ",")
+
+	for _, server := range servers {
+		server = strings.TrimSpace(server)
+		if server == "" {
+			continue
+		}
+
+		scpCommand := fmt.Sprintf("scp %s root@%s:%s", filePath, server, destinationPath)
+		cmd := exec.Command("sh", "-c", scpCommand)
 		var scpOutput bytes.Buffer
 		cmd.Stdout = &scpOutput
 		cmd.Stderr = &scpOutput
@@ -134,7 +211,7 @@ func copy(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Files copied successfully", "log": buildOutput.String()})
+	c.JSON(http.StatusOK, gin.H{"message": "File copied successfully"})
 }
 
 // @Summary 更新容器 API
@@ -386,57 +463,57 @@ func deleteContainer(c *gin.Context) {
 
 // 获取容器日志
 func getContainerLogs(c *gin.Context) {
-    containerName := c.Param("containerName")
-    serverIp := c.Query("serverIp")
+	containerName := c.Param("containerName")
+	serverIp := c.Query("serverIp")
 
-    if serverIp == "" {
-        serverIp = "localhost"
-    }
+	if serverIp == "" {
+		serverIp = "localhost"
+	}
 
-    if containerName == "" {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "请提供容器名参数"})
-        return
-    }
+	if containerName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "请提供容器名参数"})
+		return
+	}
 
-    var sshCommand string
-    var localLogFilePath string
-    if serverIp == "localhost" {
-        // 生成本地日志文件路径
-        localLogFilePath = fmt.Sprintf("/tmp/%s_%s.log", serverIp, containerName)
-        sshCommand = fmt.Sprintf("docker logs %s > %s 2>&1", containerName, localLogFilePath)
-    } else {
-        // 远程服务器上的日志文件路径
-        remoteLogFilePath := fmt.Sprintf("/tmp/%s.log", containerName)
-        sshCommand = fmt.Sprintf("ssh root@%s \"docker logs %s > %s 2>&1\"", serverIp, containerName, remoteLogFilePath)
+	var sshCommand string
+	var localLogFilePath string
+	if serverIp == "localhost" {
+		// 生成本地日志文件路径
+		localLogFilePath = fmt.Sprintf("/tmp/%s_%s.log", serverIp, containerName)
+		sshCommand = fmt.Sprintf("docker logs %s > %s 2>&1", containerName, localLogFilePath)
+	} else {
+		// 远程服务器上的日志文件路径
+		remoteLogFilePath := fmt.Sprintf("/tmp/%s.log", containerName)
+		sshCommand = fmt.Sprintf("ssh root@%s \"docker logs %s > %s 2>&1\"", serverIp, containerName, remoteLogFilePath)
 
-        // 先在远程服务器上生成日志文件
-        cmd := exec.Command("sh", "-c", sshCommand)
-        err := cmd.Run()
-        if err != nil {
-            fmt.Println("Error:", err)
-            if strings.Contains(err.Error(), "No such container") {
-                c.JSON(http.StatusNotFound, gin.H{"error": "容器不存在"})
-            } else {
-                c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("获取日志失败: %s", err.Error())})
-            }
-            return
-        }
+		// 先在远程服务器上生成日志文件
+		cmd := exec.Command("sh", "-c", sshCommand)
+		err := cmd.Run()
+		if err != nil {
+			fmt.Println("Error:", err)
+			if strings.Contains(err.Error(), "No such container") {
+				c.JSON(http.StatusNotFound, gin.H{"error": "容器不存在"})
+			} else {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("获取日志失败: %s", err.Error())})
+			}
+			return
+		}
 
-        // 从远程服务器下载日志文件到本地并重命名
-        localLogFilePath = fmt.Sprintf("/tmp/%s_%s.log", serverIp, containerName)
-        scpCommand := fmt.Sprintf("scp root@%s:%s %s", serverIp, remoteLogFilePath, localLogFilePath)
-        cmd = exec.Command("sh", "-c", scpCommand)
-        err = cmd.Run()
-        if err != nil {
-            fmt.Println("Error:", err)
-            c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("下载日志失败: %s", err.Error())})
-            return
-        }
-    }
+		// 从远程服务器下载日志文件到本地并重命名
+		localLogFilePath = fmt.Sprintf("/tmp/%s_%s.log", serverIp, containerName)
+		scpCommand := fmt.Sprintf("scp root@%s:%s %s", serverIp, remoteLogFilePath, localLogFilePath)
+		cmd = exec.Command("sh", "-c", scpCommand)
+		err = cmd.Run()
+		if err != nil {
+			fmt.Println("Error:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("下载日志失败: %s", err.Error())})
+			return
+		}
+	}
 
-    // 返回日志文件的下载链接
-    logFileURL := fmt.Sprintf("http://localhost:8081/downloads/%s_%s.log", serverIp, containerName)
-    c.JSON(http.StatusOK, gin.H{"logFileURL": logFileURL})
+	// 返回日志文件的下载链接
+	logFileURL := fmt.Sprintf("http://localhost:8081/downloads/%s_%s.log", serverIp, containerName)
+	c.JSON(http.StatusOK, gin.H{"logFileURL": logFileURL})
 }
 
 // @Summary 获取服务器状态
@@ -843,7 +920,8 @@ func main() {
 	r.GET("/memory-usage", getMemoryUsage)
 	r.GET("/logs", getLogs)
 	// 部署文件路由
-	r.POST("/copy", copy)
+	r.GET("/copy", copy)
+	r.POST("/copyFile", copyFile)
 	// 更新容器 API 路由
 	r.POST("/update-docker/:version/:containerName", handleUpdateDocker)
 	// 用户登录路由
