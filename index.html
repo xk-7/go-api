@@ -148,25 +148,27 @@
 <!-- File Selection Modal -->
 <div class="modal fade" id="fileSelectionModal" tabindex="-1" role="dialog" aria-labelledby="fileSelectionModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="fileSelectionModalLabel">Select Files to Copy</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="fileSelectionForm">
-                    <div id="fileCheckboxes"></div>
-                    <button type="submit" class="btn btn-primary mt-3">Confirm</button>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-            </div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="fileSelectionModalLabel">选择要复制的文件</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
         </div>
+        <div class="modal-body">
+          <div id="fileCheckboxes">
+            <!-- 文件选择列表将动态生成在这里 -->
+          </div>
+          <button id="selectAll" class="btn btn-primary">全选</button>
+        </div>
+        <div class="modal-footer">
+          <form id="fileSelectionForm">
+            <button type="submit" class="btn btn-primary">提交</button>
+          </form>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
 
 
 
@@ -596,7 +598,7 @@ $('#copyForm').on('submit', function(event) {
             console.error(error);
         });
     } else {
-        axios.post(`/copy`, null, {
+        axios.get(`/copy`, {
             params: {
                 serverIps,
                 buildDir,
@@ -652,6 +654,11 @@ $('#fileSelectionForm').on('submit', function(event) {
         });
     });
 });
+// 全选按钮事件处理
+$('#selectAll').on('click', function() {
+    $('#fileCheckboxes input[type="checkbox"]').prop('checked', true);
+});
+
 
 
 
