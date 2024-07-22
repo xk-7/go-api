@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>API Management Interface</title>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
             background-color: #f8f9fa;
@@ -14,6 +14,16 @@
         }
         .btn-block {
             margin-bottom: 20px; /* 增加按钮之间的垂直间距 */
+        }
+    </style>
+    <style>
+        #terminalOutput {
+            height: 300px;
+            background-color: #000;
+            color: #0f0;
+            overflow-y: scroll;
+            padding: 10px;
+            font-family: monospace;
         }
     </style>
 </head>
@@ -63,7 +73,7 @@
             </div>
             <div class="col-md-4">
                 <button class="btn-success btn-block" data-toggle="modal" data-target="#logsModal">logsModal</button>
-            </div>            
+            </div>         
         </div>
     </div>
 
@@ -427,6 +437,58 @@
     </div>
 </div>
 
+        <!-- 登录模态框 -->
+        <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="loginModalLabel">Login</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="loginForm">
+                            <div class="form-group">
+                                <label for="username">Username</label>
+                                <input type="text" class="form-control" id="username" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="passwd">Password</label>
+                                <input type="password" class="form-control" id="passwd" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="serverip">Server IP</label>
+                                <input type="text" class="form-control" id="serverip" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Login</button>
+                            <div id="loginError" class="text-danger mt-2"></div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 终端模态框 -->
+        <div class="modal fade" id="terminalModal" tabindex="-1" role="dialog" aria-labelledby="terminalModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="terminalModalLabel">Terminal</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="terminalOutput"></div>
+                        <input type="text" id="terminalInput" class="form-control mt-2" placeholder="Type a command and press Enter">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-primary btn-block" data-toggle="modal" data-target="#loginModal">Login to Server</button>
+        </div>
+
 
  <!-- Result Modal -->
  <div class="modal fade" id="resultModal" tabindex="-1" role="dialog" aria-labelledby="resultModalLabel" aria-hidden="true">
@@ -448,11 +510,11 @@
     </div>
 </div>
 
-    <!-- jQuery and Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- 本地 jQuery 和 Bootstrap JS -->
+    <script src="js/jquery-3.5.1.slim.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/axios.min.js"></script>
 
     <script>
 // Create User
@@ -734,6 +796,102 @@ $(document).ready(function() {
             .finally(() => {
                 hideLoading();
             });
+    });
+});
+
+//Terminal
+$(document).ready(function () {
+    const socket = {
+        connection: null,
+        isOpen: false
+    };
+
+    // 登录表单提交事件
+    $('#loginForm').on('submit', function (e) {
+        e.preventDefault();
+
+        const username = $('#username').val();
+        const passwd = $('#passwd').val();
+        const serverip = $('#serverip').val();
+
+        axios.post('/serverlogin', null, {
+            params: { username, passwd, serverip }
+        })
+        .then(response => {
+            $('#loginResult').text(response.data.message);
+            $('#loginModal').modal('hide');
+            $('#terminalModal').modal('show');
+
+            // 连接 WebSocket
+            socket.connection = new WebSocket(`ws://localhost:8081/terminal?username=${username}`);
+
+socket.connection.onopen = () => {
+    console.log('WebSocket connection established');
+};
+
+socket.connection.onmessage = (event) => {
+    console.log('Message from server:', event.data);
+};
+
+socket.connection.onclose = (event) => {
+    if (event.wasClean) {
+        console.log(`Connection closed cleanly, code=${event.code}, reason=${event.reason}`);
+    } else {
+        console.error(`Connection died, code=${event.code}`);
+    }
+};
+
+socket.connection.onerror = (error) => {
+    console.error('WebSocket error:', error);
+};
+
+// Check WebSocket status before sending data
+$('#terminalInput').on('keypress', function (e) {
+    if (e.which === 13) {
+        if (socket.connection.readyState === WebSocket.OPEN) {
+            const command = $(this).val();
+            socket.connection.send(command + '\n');
+            $(this).val('');
+        } else {
+            console.error('WebSocket is not open. Cannot send message.');
+        }
+    }
+});
+
+
+socket.connection.onerror = (error) => {
+    console.error('WebSocket error:', error);
+};
+
+$('#terminalInput').on('keypress', function (e) {
+    if (e.which === 13 && socket.connection.readyState === WebSocket.OPEN) {
+        const command = $(this).val();
+        socket.connection.send(command + '\n');
+        $(this).val('');
+    } else {
+        console.error('WebSocket is not open. Cannot send message.');
+    }
+});
+
+
+
+            // 发送终端命令
+            $('#terminalInput').on('keypress', function (e) {
+                if (e.which === 13) {
+                    if (socket.isOpen) {
+                        const command = $(this).val();
+                        console.log('Sending command to server:', command);
+                        socket.connection.send(command + '\n');
+                        $(this).val('');
+                    } else {
+                        console.log('WebSocket is not open. Cannot send message.');
+                    }
+                }
+            });
+        })
+        .catch(error => {
+            $('#loginResult').text('登录失败: ' + error.message);
+        });
     });
 });
 

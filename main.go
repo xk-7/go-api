@@ -4,14 +4,20 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"log"
 	"net/http"
 	"os"
 	"os/exec"
 	"strings"
+	"time"
+
+	"golang.org/x/crypto/ssh"
 
 	_ "go-api/docs" // 导入 Swagger 文档模块
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -579,10 +585,234 @@ func getLogs(c *gin.Context) {
 	c.String(http.StatusOK, string(data))
 }
 
+var sessions = make(map[string]*ssh.Client) // 用于存储每个用户的 SSH 客户端
+
+// WebSocket 升级器
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
+
+// 登录接口
+// @Summary 登录服务器并建立 WebSocket 连接
+// @Description 使用用户名、密码和服务器IP进行登录
+// @Tags server
+// @Accept  json
+// @Produce  json
+// @Param username query string true "用户名"
+// @Param passwd query string true "密码"
+// @Param serverip query string true "服务器IP"
+// @Success 200 {string} string "登录成功"
+// @Failure 400 {string} string "无效的输入"
+// @Failure 500 {string} string "内部服务器错误"
+// @Router /serverlogin [post]
+func serverLogin(c *gin.Context) {
+	username := c.Query("username")
+	passwd := c.Query("passwd")
+	serverip := c.Query("serverip")
+
+	if username == "" || passwd == "" || serverip == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "用户名、密码和服务器IP不能为空"})
+		return
+	}
+
+	client, err := connectToServer(username, passwd, serverip)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "登录失败"})
+		return
+	}
+
+	sessions[username] = client
+	c.JSON(http.StatusOK, gin.H{"message": "登录成功"})
+}
+
+// 连接到服务器并返回 SSH 客户端
+func connectToServer(username, passwd, serverip string) (*ssh.Client, error) {
+	config := &ssh.ClientConfig{
+		User: username,
+		Auth: []ssh.AuthMethod{
+			ssh.Password(passwd),
+		},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+	}
+
+	client, err := ssh.Dial("tcp", serverip+":22", config)
+	if err != nil {
+		return nil, err
+	}
+
+	return client, nil
+}
+
+// @Summary WebSocket 终端接口
+// @Description 建立 WebSocket 连接，用于与服务器交互
+// @Tags terminal
+// @Produce  json
+// @Success 200 {string} string "WebSocket 连接成功"
+// @Failure 500 {string} string "内部服务器错误"
+// @Router /terminal [get]
+func terminal(c *gin.Context) {
+	username := c.Query("username")
+	if username == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "用户名不能为空"})
+		return
+	}
+
+	client, ok := sessions[username]
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "用户未登录"})
+		return
+	}
+
+	ws, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		log.Printf("Error upgrading connection to WebSocket: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to establish WebSocket connection"})
+		return
+	}
+	defer func() {
+		if err := ws.Close(); err != nil {
+			log.Printf("Error closing WebSocket connection: %v", err)
+		}
+		log.Println("WebSocket connection closed")
+	}()
+
+	session, err := client.NewSession()
+	if err != nil {
+		log.Printf("Error creating session: %v", err)
+		ws.WriteMessage(websocket.TextMessage, []byte("Failed to create session"))
+		return
+	}
+	defer session.Close()
+
+	stdin, err := session.StdinPipe()
+	if err != nil {
+		log.Printf("Error creating stdin pipe: %v", err)
+		ws.WriteMessage(websocket.TextMessage, []byte("Failed to create stdin pipe"))
+		return
+	}
+
+	stdout, err := session.StdoutPipe()
+	if err != nil {
+		log.Printf("Error creating stdout pipe: %v", err)
+		ws.WriteMessage(websocket.TextMessage, []byte("Failed to create stdout pipe"))
+		return
+	}
+
+	stderr, err := session.StderrPipe()
+	if err != nil {
+		log.Printf("Error creating stderr pipe: %v", err)
+		ws.WriteMessage(websocket.TextMessage, []byte("Failed to create stderr pipe"))
+		return
+	}
+
+	if err := session.Shell(); err != nil {
+		log.Printf("Error starting shell: %v", err)
+		ws.WriteMessage(websocket.TextMessage, []byte("Failed to start shell"))
+		return
+	}
+
+	// PONG handler to keep the connection alive
+	ws.SetPongHandler(func(appData string) error {
+		log.Println("Received PONG from client")
+		return nil
+	})
+	// PING handler to respond to pings from the client
+	ws.SetPingHandler(func(appData string) error {
+		log.Println("Received PING from client")
+		return ws.WriteMessage(websocket.PongMessage, nil)
+	})
+
+	go func() {
+		buffer := make([]byte, 1024)
+		for {
+			n, err := stdout.Read(buffer)
+			if err != nil {
+				if err != io.EOF {
+					log.Printf("Error reading from stdout: %v", err)
+				}
+				break
+			}
+			if n > 0 {
+				msg := string(buffer[:n])
+				log.Printf("Sending data to client from stdout: %s", msg)
+				if err := ws.SetWriteDeadline(time.Now().Add(10 * time.Second)); err != nil {
+					log.Printf("Error setting write deadline: %v", err)
+					return
+				}
+				if err := ws.WriteMessage(websocket.TextMessage, buffer[:n]); err != nil {
+					if websocket.IsCloseError(err, websocket.CloseNormalClosure) {
+						log.Println("WebSocket closed normally")
+					} else {
+						log.Printf("Error sending message to WebSocket: %v", err)
+					}
+					break
+				}
+			}
+		}
+	}()
+
+	go func() {
+		buffer := make([]byte, 1024)
+		for {
+			n, err := stderr.Read(buffer)
+			if err != nil {
+				if err != io.EOF {
+					log.Printf("Error reading from stderr: %v", err)
+				}
+				break
+			}
+			if n > 0 {
+				msg := string(buffer[:n])
+				log.Printf("Sending data to client from stderr: %s", msg)
+				if err := ws.SetWriteDeadline(time.Now().Add(10 * time.Second)); err != nil {
+					log.Printf("Error setting write deadline: %v", err)
+					return
+				}
+				if err := ws.WriteMessage(websocket.TextMessage, buffer[:n]); err != nil {
+					if websocket.IsCloseError(err, websocket.CloseNormalClosure) {
+						log.Println("WebSocket closed normally")
+					} else {
+						log.Printf("Error sending message to WebSocket: %v", err)
+					}
+					break
+				}
+			}
+		}
+	}()
+
+	go func() {
+		for {
+			_, msg, err := ws.ReadMessage()
+			if err != nil {
+				if websocket.IsCloseError(err, websocket.CloseNormalClosure) {
+					log.Println("WebSocket closed normally")
+				} else {
+					log.Printf("Error reading WebSocket message: %v", err)
+				}
+				break
+			}
+			log.Printf("Received message from WebSocket: %s", msg)
+			if stdin != nil {
+				if _, err := io.WriteString(stdin, string(msg)+"\n"); err != nil {
+					log.Printf("Error writing to stdin: %v", err)
+					break
+				}
+			} else {
+				log.Println("stdin is not available.")
+				break
+			}
+		}
+	}()
+}
+
 func main() {
 	r := gin.Default()
 
-	// Serve static HTML file
+	// 设置静态文件目录
+	r.Static("/css", "./css")
+	r.Static("/js", "./js")
 	r.StaticFile("/", "./index.html")
 
 	// 添加 Swagger 路由
@@ -614,5 +844,14 @@ func main() {
 	// 提供下载文件的路由
 	r.Static("/downloads", "/tmp")
 
-	r.Run(":8081")
+	// 登录接口
+	r.POST("/serverlogin", serverLogin)
+	// WebSocket 终端接口
+	r.GET("/terminal", terminal)
+
+	// 启动服务器
+	log.Println("Starting server on :8081")
+	if err := r.Run(":8081"); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
 }
