@@ -386,42 +386,57 @@ func deleteContainer(c *gin.Context) {
 
 // 获取容器日志
 func getContainerLogs(c *gin.Context) {
-	containerName := c.Param("containerName")
-	serverIp := c.Query("serverIp")
+    containerName := c.Param("containerName")
+    serverIp := c.Query("serverIp")
 
-	if serverIp == "" {
-		serverIp = "localhost"
-	}
+    if serverIp == "" {
+        serverIp = "localhost"
+    }
 
-	if containerName == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "请提供容器名参数"})
-		return
-	}
+    if containerName == "" {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "请提供容器名参数"})
+        return
+    }
 
-	// SSH 命令：获取 Docker 容器日志并保存到临时文件
-	var sshCommand string
-	if serverIp == "localhost" {
-		sshCommand = fmt.Sprintf("docker logs %s > /tmp/%s.log 2>&1", containerName, containerName)
-	} else {
-		sshCommand = fmt.Sprintf("docker logs %s > /tmp/%s.log 2>&1", containerName, containerName)
-		// 使用 SSH 执行远程命令
-		sshCommand = fmt.Sprintf("ssh root@%s \"%s\"", serverIp, sshCommand)
-	}
+    var sshCommand string
+    var localLogFilePath string
+    if serverIp == "localhost" {
+        // 生成本地日志文件路径
+        localLogFilePath = fmt.Sprintf("/tmp/%s_%s.log", serverIp, containerName)
+        sshCommand = fmt.Sprintf("docker logs %s > %s 2>&1", containerName, localLogFilePath)
+    } else {
+        // 远程服务器上的日志文件路径
+        remoteLogFilePath := fmt.Sprintf("/tmp/%s.log", containerName)
+        sshCommand = fmt.Sprintf("ssh root@%s \"docker logs %s > %s 2>&1\"", serverIp, containerName, remoteLogFilePath)
 
-	cmd := exec.Command("sh", "-c", sshCommand)
-	err := cmd.Run()
-	if err != nil {
-		if strings.Contains(err.Error(), "No such container") {
-			c.JSON(http.StatusNotFound, gin.H{"error": "容器不存在"})
-		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("获取日志失败: %s", err.Error())})
-		}
-		return
-	}
+        // 先在远程服务器上生成日志文件
+        cmd := exec.Command("sh", "-c", sshCommand)
+        err := cmd.Run()
+        if err != nil {
+            fmt.Println("Error:", err)
+            if strings.Contains(err.Error(), "No such container") {
+                c.JSON(http.StatusNotFound, gin.H{"error": "容器不存在"})
+            } else {
+                c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("获取日志失败: %s", err.Error())})
+            }
+            return
+        }
 
-	// 返回日志文件的下载链接
-	logFileURL := fmt.Sprintf("http://%s:8081/downloads/%s.log", serverIp, containerName)
-	c.JSON(http.StatusOK, gin.H{"logFileURL": logFileURL})
+        // 从远程服务器下载日志文件到本地并重命名
+        localLogFilePath = fmt.Sprintf("/tmp/%s_%s.log", serverIp, containerName)
+        scpCommand := fmt.Sprintf("scp root@%s:%s %s", serverIp, remoteLogFilePath, localLogFilePath)
+        cmd = exec.Command("sh", "-c", scpCommand)
+        err = cmd.Run()
+        if err != nil {
+            fmt.Println("Error:", err)
+            c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("下载日志失败: %s", err.Error())})
+            return
+        }
+    }
+
+    // 返回日志文件的下载链接
+    logFileURL := fmt.Sprintf("http://localhost:8081/downloads/%s_%s.log", serverIp, containerName)
+    c.JSON(http.StatusOK, gin.H{"logFileURL": logFileURL})
 }
 
 // @Summary 获取服务器状态

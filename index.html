@@ -629,7 +629,7 @@ $('#deleteContainerForm').on('submit', function(event) {
 $('#getLogsForm').on('submit', function(event) {
     event.preventDefault();
     const containerName = $('#logContainerName').val();
-    const serverIp = $('#logServerIp').val() || ''; // 如果为空，设置为空字符串
+    const serverIp = $('#logServerIp').val() || ''; // 如果为空，设置为默认IP
     axios.get(`/logs/${containerName}`, { params: { serverIp } })
         .then(response => {
             const logFileURL = response.data.logFileURL;
