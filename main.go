@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"embed"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -22,9 +21,6 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
-
-//go:embed static/*
-var staticFiles embed.FS
 
 // @Summary 创建 Linux 用户
 // @Description 创建一个新的 Linux 用户
@@ -961,14 +957,6 @@ func terminal(c *gin.Context) {
 
 func main() {
 	r := gin.Default()
-	// 将嵌入的静态文件作为 HTTP 文件系统
-	fs := http.FS(staticFiles)
-
-	// 设置文件服务器
-	http.Handle("/", http.FileServer(fs))
-
-	// 启动 HTTP 服务器
-	http.ListenAndServe(":8081", nil)
 
 	// 设置静态文件目录
 	r.Static("/css", "./css")
@@ -1010,4 +998,9 @@ func main() {
 	// WebSocket 终端接口
 	r.GET("/terminal", terminal)
 
+	// 启动服务器
+	log.Println("Starting server on :8081")
+	if err := r.Run(":8081"); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
 }
