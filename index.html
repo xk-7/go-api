@@ -1,1023 +1,1082 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API Management Interface</title>
-    <link rel="stylesheet" href="css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .container {
-            margin-top: 50px;
-        }
-        .btn-block {
-            margin-bottom: 20px; /* 增加按钮之间的垂直间距 */
-        }
-    </style>
-    <style>
-        #terminalOutput {
-            height: 300px;
-            background-color: #000;
-            color: #0f0;
-            overflow-y: scroll;
-            padding: 10px;
-            font-family: monospace;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Management Interface</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .btn-block {
+            margin-bottom: 20px; /* 增加按钮之间的垂直间距 */
+        }
+    </style>
+    <style>
+        #terminalOutput {
+            height: 300px;
+            background-color: #000;
+            color: #0f0;
+            overflow-y: scroll;
+            padding: 10px;
+            font-family: monospace;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="text-center">API Management Interface</h1>
+    <div class="container">
+        <h1 class="text-center">API Management Interface</h1>
 
-        <div class="row">
-            <div class="col-md-4">
-                <button class="btn btn-primary btn-block" data-toggle="modal" data-target="#createUserModal">Create User</button>
-            </div>
-            <div class="col-md-4">
-                <button class="btn btn-primary btn-block" data-toggle="modal" data-target="#copyFilesModal">Deploy Files</button>
-            </div>
-            <div class="col-md-4">
-                <button class="btn btn-primary btn-block" data-toggle="modal" data-target="#updateDockerModal">Update Docker Container</button>
-            </div>
-            <div class="col-md-4">
-                <button class="btn btn-primary btn-block" data-toggle="modal" data-target="#listContainersModal">List Docker Containers</button>
-            </div>
-            <div class="col-md-4">
-                <button class="btn btn-primary btn-block" data-toggle="modal" data-target="#pauseContainerModal">Pause Docker Container</button>
-            </div>
-            <div class="col-md-4">
-                <button class="btn btn-danger btn-block" data-toggle="modal" data-target="#deleteContainerModal">Delete Docker Container</button>
-            </div>
-            <div class="col-md-4">
-                <button class="btn btn-info btn-block" data-toggle="modal" data-target="#getLogsModal">Get Container Logs</button>
-            </div>
-            <div class="col-md-4">
-                <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#statusModal">Server Status</button>
-            </div>
-            <div class="col-md-4">
-                <button class="btn btn-info btn-block" data-toggle="modal" data-target="#firewallModal">Manage Firewall</button>
-            </div>
-            <div class="col-md-4">
-                <button class="btn btn-secondary btn-block" data-toggle="modal" data-target="#systemInfoModal">System Info</button>
-            </div>
-            <div class="col-md-4">
-                <button class="btn-success btn-block" data-toggle="modal" data-target="#diskUsageModal">diskUsageModal</button>
-            </div>
-            <div class="col-md-4">
-                <button class="btn-success btn-block" data-toggle="modal" data-target="#loadModal">loadModal</button>
-            </div>
-            <div class="col-md-4">
-                <button class="btn-success btn-block" data-toggle="modal" data-target="#memoryUsageModal">memoryUsageModal</button>
-            </div>
-            <div class="col-md-4">
-                <button class="btn-success btn-block" data-toggle="modal" data-target="#logsModal">logsModal</button>
-            </div>         
-        </div>
-    </div>
+        <div class="row">
+            <div class="col-md-4">
+                <button class="btn btn-primary btn-block" data-toggle="modal" data-target="#createUserModal">Create User</button>
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-primary btn-block" data-toggle="modal" data-target="#copyFilesModal">Deploy Files</button>
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-primary btn-block" data-toggle="modal" data-target="#updateDockerModal">Update Docker Container</button>
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-primary btn-block" data-toggle="modal" data-target="#listContainersModal">List Docker Containers</button>
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-primary btn-block" data-toggle="modal" data-target="#pauseContainerModal">Pause Docker Container</button>
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-danger btn-block" data-toggle="modal" data-target="#deleteContainerModal">Delete Docker Container</button>
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-info btn-block" data-toggle="modal" data-target="#getLogsModal">Get Container Logs</button>
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#statusModal">Server Status</button>
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-info btn-block" data-toggle="modal" data-target="#firewallModal">Manage Firewall</button>
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-secondary btn-block" data-toggle="modal" data-target="#systemInfoModal">System Info</button>
+            </div>
+            <div class="col-md-4">
+                <button class="btn-success btn-block" data-toggle="modal" data-target="#diskUsageModal">diskUsageModal</button>
+            </div>
+            <div class="col-md-4">
+                <button class="btn-success btn-block" data-toggle="modal" data-target="#loadModal">loadModal</button>
+            </div>
+            <div class="col-md-4">
+                <button class="btn-success btn-block" data-toggle="modal" data-target="#memoryUsageModal">memoryUsageModal</button>
+            </div>
+            <div class="col-md-4">
+                <button class="btn-success btn-block" data-toggle="modal" data-target="#logsModal">logsModal</button>
+            </div>
+        </div>
+    </div>
 
 <!-- Create User Modal -->
 <div class="modal fade" id="createUserModal" tabindex="-1" role="dialog" aria-labelledby="createUserModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="createUserModalLabel">Create Linux User</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="createUserForm">
-                    <div class="form-group">
-                        <label for="createUserUsername">Username</label>
-                        <input type="text" class="form-control" id="createUserUsername" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="createUserPassword">Password</label>
-                        <input type="password" class="form-control" id="createUserPassword" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Create User</button>
-                </form>
-                <div id="createUserResult" class="mt-3"></div>
-            </div>
-        </div>
-    </div>
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createUserModalLabel">Create Linux User</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createUserForm">
+                    <div class="form-group">
+                        <label for="createUserUsername">Username</label>
+                        <input type="text" class="form-control" id="createUserUsername" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="createUserPassword">Password</label>
+                        <input type="password" class="form-control" id="createUserPassword" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create User</button>
+                </form>
+                <div id="createUserResult" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Deploy Files Modal -->
 <div class="modal fade" id="copyFilesModal" tabindex="-1" role="dialog" aria-labelledby="copyFilesModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="copyFilesModalLabel">Deploy Files to Server</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="copyForm">
-                    <div class="form-group">
-                        <label for="serverIps">Server IPs (comma separated)</label>
-                        <input type="text" class="form-control" id="serverIps" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="buildDir">Build Directory</label>
-                        <input type="text" class="form-control" id="buildDir">
-                    </div>
-                    <div class="form-group">
-                        <label for="buildCommand">Build Command</label>
-                        <input type="text" class="form-control" id="buildCommand">
-                    </div>
-                    <div class="form-group">
-                        <label for="buildOutputDir">Build Output Directory</label>
-                        <input type="text" class="form-control" id="buildOutputDir">
-                    </div>
-                    <div class="form-group">
-                        <label for="destinationPath">Destination Path</label>
-                        <input type="text" class="form-control" id="destinationPath">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Copy Files</button>
-                </form>
-                <div id="copyResult" class="mt-3"></div>
-            </div>
-        </div>
-    </div>
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="copyFilesModalLabel">Deploy Files to Server</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="copyForm">
+                    <div class="form-group">
+                        <label for="serverIps">Server IPs</label>
+                        <input type="text" class="form-control" id="serverIpsInput" placeholder="Enter server IPs" required>
+                        <select class="form-control mt-2" id="serverIpsSelect">
+                            <option value="">Select server IPs</option>
+                            <option value="120.79.57.164">120.79.57.164</option>
+                            <option value="120.78.213.120,39.108.68.102">120.78.213.120,39.108.68.102</option>
+                            <!-- Add more options as needed -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="buildDir">Build Directory</label>
+                        <input type="text" class="form-control" id="buildDirInput" placeholder="Enter build directory">
+                        <select class="form-control mt-2" id="buildDirSelect">
+                            <option value="">Select a build directory</option>
+                            <option value="/root/dockerdata/jenkins/workspace/rcpweb/">rcpweb</option>
+                            <option value="/root/dockerdata/jenkins/workspace/meeting">meeting</option>
+                            <option value="/root/dockerdata/jenkins/workspace/mobile">mobile</option>
+                            <!-- Add more options as needed -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="buildCommand">Build Command</label>
+                        <input type="text" class="form-control" id="buildCommandInput" placeholder="Enter build command">
+                        <select class="form-control mt-2" id="buildCommandSelect">
+                            <option value="">Select a build command</option>
+                            <option value="npm run build">npm run build</option>
+                            <option value="npm run build-prod">meeting,mobile</option>
+                            <option value="pnpm build:prod-https">pnpm build:prod-https</option>
+                            <!-- Add more options as needed -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="buildOutputDir">Build Output Directory</label>
+                        <input type="text" class="form-control" id="buildOutputDirInput" placeholder="Enter build output directory">
+                        <select class="form-control mt-2" id="buildOutputDirSelect">
+                            <option value="">Select a build output directory</option>
+                            <option value="/root/dockerdata/jenkins/workspace/rcpweb/dist/">rcpweb</option>
+                            <option value="/root/dockerdata/jenkins/workspace/mobile/dist/">mobile</option>
+                            <option value="/root/dockerdata/jenkins/workspace/meeting/dist/">meeting</option>
+                            <!-- Add more options as needed -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="destinationPath">Destination Path</label>
+                        <input type="text" class="form-control" id="destinationPathInput" placeholder="Enter destination path">
+                        <select class="form-control mt-2" id="destinationPathSelect">
+                            <option value="">Select a destination path</option>
+                            <option value="/home/sqray/rcpweb">/home/sqray/rcpweb</option>
+                            <option value="/usr/share/nginx/html/meeting">release-meeting</option>
+                            <option value="/dest/path3">Destination Path 3</option>
+                            <!-- Add more options as needed -->
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Copy Files</button>
+                </form>
+                <div id="copyResult" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- File Selection Modal -->
 <div class="modal fade" id="fileSelectionModal" tabindex="-1" role="dialog" aria-labelledby="fileSelectionModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="fileSelectionModalLabel">选择要复制的文件</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div id="fileCheckboxes">
-            <!-- 文件选择列表将动态生成在这里 -->
-          </div>
-          <button id="selectAll" class="btn btn-primary">全选</button>
-        </div>
-        <div class="modal-footer">
-          <form id="fileSelectionForm">
-            <button type="submit" class="btn btn-primary">提交</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="fileSelectionModalLabel">选择要复制的文件</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="fileCheckboxes">
+                    <!-- 文件选择列表将动态生成在这里 -->
+                </div>
+                <button id="selectAll" class="btn btn-primary">全选</button>
+            </div>
+            <div class="modal-footer">
+                <form id="fileSelectionForm">
+                    <button type="submit" class="btn btn-primary">提交</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
-
-
-
-
-    <!-- Update Docker Container Modal -->
+    <!-- Update Docker Container Modal -->
 <div class="modal fade" id="updateDockerModal" tabindex="-1" role="dialog" aria-labelledby="updateDockerModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="updateDockerModalLabel">Update Docker Container</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="updateDockerForm">
-                        <div class="form-group">
-                            <label for="dockerVersion">Version</label>
-                            <input type="text" class="form-control" id="dockerVersion" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="containerName">Container Name</label>
-                            <input type="text" class="form-control" id="containerName" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="dockerServerIps">Server IPs (comma separated)</label>
-                            <input type="text" class="form-control" id="dockerServerIps" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Update Docker</button>
-                    </form>
-                    <div id="updateDockerResult" class="mt-3"></div>
-                </div>
-            </div>
-        </div>
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateDockerModalLabel">Update Docker Container</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="updateDockerForm">
+                        <div class="form-group">
+                            <label for="dockerVersion">Version</label>
+                            <input type="text" class="form-control" id="dockerVersion" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="containerName">Container Name</label>
+                            <input type="text" class="form-control" id="containerName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="dockerServerIps">Server IPs (comma separated)</label>
+                            <input type="text" class="form-control" id="dockerServerIps" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Docker</button>
+                    </form>
+                    <div id="updateDockerResult" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
 </div>
 
-    <!-- List Docker Containers Modal -->
+    <!-- List Docker Containers Modal -->
 <div class="modal fade" id="listContainersModal" tabindex="-1" role="dialog" aria-labelledby="listContainersModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="listContainersModalLabel">List Docker Containers</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <button id="listContainersButton" class="btn btn-primary btn-block">List Containers</button>
-                    <div id="listContainersResult" class="mt-3"></div>
-                </div>
-            </div>
-        </div>
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="listContainersModalLabel">List Docker Containers</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <button id="listContainersButton" class="btn btn-primary btn-block">List Containers</button>
+                    <div id="listContainersResult" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
 </div>
 
-    <!-- Pause Docker Container Modal -->
+    <!-- Pause Docker Container Modal -->
 <div class="modal fade" id="pauseContainerModal" tabindex="-1" role="dialog" aria-labelledby="pauseContainerModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="pauseContainerModalLabel">Pause Docker Container</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="pauseContainerForm">
-                        <div class="form-group">
-                            <label for="pauseContainerName">Container Name</label>
-                            <input type="text" class="form-control" id="pauseContainerName" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Pause Container</button>
-                    </form>
-                    <div id="pauseContainerResult" class="mt-3"></div>
-                </div>
-            </div>
-        </div>
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pauseContainerModalLabel">Pause Docker Container</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="pauseContainerForm">
+                        <div class="form-group">
+                            <label for="pauseContainerName">Container Name</label>
+                            <input type="text" class="form-control" id="pauseContainerName" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Pause Container</button>
+                    </form>
+                    <div id="pauseContainerResult" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
 </div>
 
-    <!-- Delete Docker Container Modal -->
- <div class="modal fade" id="deleteContainerModal" tabindex="-1" role="dialog" aria-labelledby="deleteContainerModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="deleteContainerModalLabel">Delete Docker Container</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="deleteContainerForm">
-                        <div class="form-group">
-                            <label for="deleteContainerName">Container Name</label>
-                            <input type="text" class="form-control" id="deleteContainerName" required>
-                        </div>
-                        <button type="submit" class="btn btn-danger">Delete Container</button>
-                    </form>
-                    <div id="deleteContainerResult" class="mt-3"></div>
-                </div>
-            </div>
-        </div>
+    <!-- Delete Docker Container Modal -->
+ <div class="modal fade" id="deleteContainerModal" tabindex="-1" role="dialog" aria-labelledby="deleteContainerModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteContainerModalLabel">Delete Docker Container</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="deleteContainerForm">
+                        <div class="form-group">
+                            <label for="deleteContainerName">Container Name</label>
+                            <input type="text" class="form-control" id="deleteContainerName" required>
+                        </div>
+                        <button type="submit" class="btn btn-danger">Delete Container</button>
+                    </form>
+                    <div id="deleteContainerResult" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
 </div>
 
 <!-- Get Logs Modal -->
 <div class="modal fade" id="getLogsModal" tabindex="-1" role="dialog" aria-labelledby="getLogsModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="getLogsModalLabel">Get Container Logs</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="getLogsForm">
-                    <div class="form-group">
-                        <label for="logContainerName">Container Name</label>
-                        <input type="text" class="form-control" id="logContainerName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="logServerIp">Server IP (optional)</label>
-                        <input type="text" class="form-control" id="logServerIp">
-                    </div>
-                    <button type="submit" id="getLogsButton" class="btn btn-primary">Get Logs</button>
-                </form>
-                <div id="logResult" class="mt-3"></div>
-            </div>
-        </div>
-    </div>
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="getLogsModalLabel">Get Container Logs</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="getLogsForm">
+                    <div class="form-group">
+                        <label for="logContainerName">Container Name</label>
+                        <input type="text" class="form-control" id="logContainerName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="logServerIp">Server IP (optional)</label>
+                        <input type="text" class="form-control" id="logServerIp">
+                    </div>
+                    <button type="submit" id="getLogsButton" class="btn btn-primary">Get Logs</button>
+                </form>
+                <div id="logResult" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
 </div>
 <!-- Feedback Modal -->
 <div class="modal fade" id="feedbackModal" tabindex="-1" role="dialog" aria-labelledby="feedbackModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="feedbackModalLabel">反馈</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body" id="feedbackMessage">
-                <!-- 反馈消息将在这里插入 -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" id="confirmFeedbackButton">确认</button>
-            </div>
-        </div>
-    </div>
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="feedbackModalLabel">反馈</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="feedbackMessage">
+                <!-- 反馈消息将在这里插入 -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="confirmFeedbackButton">确认</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Server Status Modal -->
 <div class="modal fade" id="statusModal" tabindex="-1" role="dialog" aria-labelledby="statusModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="statusModalLabel">Server Status</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <button id="statusButton" class="btn btn-primary btn-block">Get Status</button>
-                <div id="statusResult" class="mt-3"></div>
-            </div>
-        </div>
-    </div>
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="statusModalLabel">Server Status</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <button id="statusButton" class="btn btn-primary btn-block">Get Status</button>
+                <div id="statusResult" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Manage Firewall Modal -->
 <div class="modal fade" id="firewallModal" tabindex="-1" role="dialog" aria-labelledby="firewallModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="firewallModalLabel">Manage Firewall</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="firewallForm">
-                    <div class="form-group">
-                        <label for="firewallAction">Action</label>
-                        <select class="form-control" id="firewallAction" required>
-                            <option value="add">Allow</option>
-                            <option value="del">Deny</option>
-                            <option value="list">List</option>
-                        </select>
-                    </div>
-                    <div class="form-group" id="firewallRuleGroup">
-                        <label for="firewallRule">Rule</label>
-                        <input type="text" class="form-control" id="firewallRule">
-                    </div>
-                    <button type="submit" class="btn btn-primary">Apply</button>
-                </form>
-                <div id="firewallResult" class="mt-3"></div>
-            </div>
-        </div>
-    </div>
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="firewallModalLabel">Manage Firewall</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="firewallForm">
+                    <div class="form-group">
+                        <label for="firewallAction">Action</label>
+                        <select class="form-control" id="firewallAction" required>
+                            <option value="add">Allow</option>
+                            <option value="del">Deny</option>
+                            <option value="list">List</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="firewallRuleGroup">
+                        <label for="firewallRule">Rule</label>
+                        <input type="text" class="form-control" id="firewallRule">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Apply</button>
+                </form>
+                <div id="firewallResult" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- System Info Modal -->
 <div class="modal fade" id="systemInfoModal" tabindex="-1" role="dialog" aria-labelledby="systemInfoModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="systemInfoModalLabel">System Information</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <button id="systemInfoButton" class="btn btn-secondary btn-block">Get System Info</button>
-                <div id="systemInfoResult" class="mt-3"></div>
-            </div>
-        </div>
-    </div>
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="systemInfoModalLabel">System Information</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <button id="systemInfoButton" class="btn btn-secondary btn-block">Get System Info</button>
+                <div id="systemInfoResult" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Disk Usage Modal -->
 <div class="modal fade" id="diskUsageModal" tabindex="-1" role="dialog" aria-labelledby="diskUsageModalLabel" aria-hidden="true">
-    <div class="modal-dialog custom-modal-width" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="diskUsageModalLabel">Disk Usage</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <button id="diskUsageButton" class="btn btn-primary btn-block">Get Disk Usage</button>
-                <div id="diskUsageResult" class="mt-3"></div>
-            </div>
-        </div>
-    </div>
+    <div class="modal-dialog custom-modal-width" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="diskUsageModalLabel">Disk Usage</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <button id="diskUsageButton" class="btn btn-primary btn-block">Get Disk Usage</button>
+                <div id="diskUsageResult" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <style>
-    /* 自定义模态框宽度 */
-    .custom-modal-width {
-        max-width: 80%; /* 根据需要调整百分比 */
-    }
+    /* 自定义模态框宽度 */
+    .custom-modal-width {
+        max-width: 80%; /* 根据需要调整百分比 */
+    }
 </style>
 
 <!-- Load Modal -->
 <div class="modal fade" id="loadModal" tabindex="-1" role="dialog" aria-labelledby="loadModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="loadModalLabel">System Load</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <button id="loadButton" class="btn btn-primary btn-block">Get System Load</button>
-                <div id="loadResult" class="mt-3"></div>
-            </div>
-        </div>
-    </div>
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="loadModalLabel">System Load</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <button id="loadButton" class="btn btn-primary btn-block">Get System Load</button>
+                <div id="loadResult" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Memory Usage Modal -->
 <div class="modal fade" id="memoryUsageModal" tabindex="-1" role="dialog" aria-labelledby="memoryUsageModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="memoryUsageModalLabel">Memory Usage</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <button id="memoryUsageButton" class="btn btn-primary btn-block">Get Memory Usage</button>
-                <div id="memoryUsageResult" class="mt-3"></div>
-            </div>
-        </div>
-    </div>
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="memoryUsageModalLabel">Memory Usage</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <button id="memoryUsageButton" class="btn btn-primary btn-block">Get Memory Usage</button>
+                <div id="memoryUsageResult" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Logs Modal -->
 <div class="modal fade" id="logsModal" tabindex="-1" role="dialog" aria-labelledby="logsModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="logsModalLabel">System Logs</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <button id="logsButton" class="btn btn-primary btn-block">Get System Logs</button>
-                <div id="logsResult" class="mt-3"></div>
-            </div>
-        </div>
-    </div>
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="logsModalLabel">System Logs</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <button id="logsButton" class="btn btn-primary btn-block">Get System Logs</button>
+                <div id="logsResult" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
 </div>
 
-        <!-- 登录模态框 -->
-        <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="loginModalLabel">Login</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="loginForm">
-                            <div class="form-group">
-                                <label for="username">Username</label>
-                                <input type="text" class="form-control" id="username" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="passwd">Password</label>
-                                <input type="password" class="form-control" id="passwd" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="serverip">Server IP</label>
-                                <input type="text" class="form-control" id="serverip" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Login</button>
-                            <div id="loginError" class="text-danger mt-2"></div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- 登录模态框 -->
+        <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="loginModalLabel">Login</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="loginForm">
+                            <div class="form-group">
+                                <label for="username">Username</label>
+                                <input type="text" class="form-control" id="username" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="passwd">Password</label>
+                                <input type="password" class="form-control" id="passwd" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="serverip">Server IP</label>
+                                <input type="text" class="form-control" id="serverip" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Login</button>
+                            <div id="loginError" class="text-danger mt-2"></div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <!-- 终端模态框 -->
-        <div class="modal fade" id="terminalModal" tabindex="-1" role="dialog" aria-labelledby="terminalModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="terminalModalLabel">Terminal</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <div id="terminalOutput"></div>
-                        <input type="text" id="terminalInput" class="form-control mt-2" placeholder="Type a command and press Enter">
-                    </div>
-                </div>
-            </div>
-        </div>
-        <button class="btn btn-primary btn-block" data-toggle="modal" data-target="#loginModal">Login to Server</button>
-        </div>
+        <!-- 终端模态框 -->
+        <div class="modal fade" id="terminalModal" tabindex="-1" role="dialog" aria-labelledby="terminalModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="terminalModalLabel">Terminal</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="terminalOutput"></div>
+                        <input type="text" id="terminalInput" class="form-control mt-2" placeholder="Type a command and press Enter">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-primary btn-block" data-toggle="modal" data-target="#loginModal">Login to Server</button>
+        </div>
 
 
- <!-- Result Modal -->
- <div class="modal fade" id="resultModal" tabindex="-1" role="dialog" aria-labelledby="resultModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="resultModalLabel">Result</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body" id="resultModalBody">
-                <!-- Result message will be displayed here -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
+ <!-- Result Modal -->
+ <div class="modal fade" id="resultModal" tabindex="-1" role="dialog" aria-labelledby="resultModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="resultModalLabel">Result</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="resultModalBody">
+                <!-- Result message will be displayed here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
 </div>
 
-    <!-- 本地 jQuery 和 Bootstrap JS -->
-    <script src="js/jquery-3.5.1.slim.min.js"></script>
-    <script src="js/popper.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    <script src="js/axios.min.js"></script>
+    <!-- 本地 jQuery 和 Bootstrap JS -->
+    <script src="js/jquery-3.5.1.slim.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/axios.min.js"></script>
 
-    <script>
+    <script>
 // Create User
 $('#createUserForm').on('submit', function(event) {
-    event.preventDefault();
-    const username = $('#createUserUsername').val();
-    const password = $('#createUserPassword').val();
-    axios.post(`/create-user/${username}/${password}`)
-        .then(response => {
-            $('#createUserResult').text(response.data.message);
-        })
-        .catch(error => {
-            $('#createUserResult').text(error.response.data.error);
-        });
+    event.preventDefault();
+    const username = $('#createUserUsername').val();
+    const password = $('#createUserPassword').val();
+    axios.post(`/create-user/${username}/${password}`)
+        .then(response => {
+            $('#createUserResult').text(response.data.message);
+        })
+        .catch(error => {
+            $('#createUserResult').text(error.response.data.error);
+        });
 });
 
-// Deploy Files
-$('#copyForm').on('submit', function(event) {
-    event.preventDefault();
-    
-    const serverIps = $('#serverIps').val();
-    const buildDir = $('#buildDir').val();
-    const buildCommand = $('#buildCommand').val();
-    const buildOutputDir = $('#buildOutputDir').val();
-    const destinationPath = $('#destinationPath').val();
+document.addEventListener('DOMContentLoaded', () => {
+    const copyForm = document.getElementById('copyForm');
+    const fileSelectionModal = new bootstrap.Modal(document.getElementById('fileSelectionModal'), {});
+    const fileCheckboxes = document.getElementById('fileCheckboxes');
+    const selectAllButton = document.getElementById('selectAll');
 
-    if (!buildDir && !buildCommand) {
-        // 获取 buildOutputDir 下的文件列表
-        axios.get(`/copy`, {
-            params: {
-                serverIps,
-                buildOutputDir,
-                destinationPath
-            }
-        })
-        .then(response => {
-            const fileCheckboxes = $('#fileCheckboxes');
-            fileCheckboxes.empty();
-            response.data.files.forEach(file => {
-                fileCheckboxes.append(`
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="${file}" id="file_${file}">
-                        <label class="form-check-label" for="file_${file}">
-                            ${file}
-                        </label>
-                    </div>
-                `);
-            });
-            $('#fileSelectionModal').modal('show');
-        })
-        .catch(error => {
-            console.error(error);
-        });
-    } else {
-        axios.get(`/copy`, {
-            params: {
-                serverIps,
-                buildDir,
-                buildCommand,
-                buildOutputDir,
-                destinationPath
-            }
-        })
-        .then(response => {
-            $('#copyResult').html(`<div class="alert alert-success">${response.data.message}</div>`);
-        })
-        .catch(error => {
-            $('#copyResult').html(`<div class="alert alert-danger">${error.response.data.error}</div>`);
-        });
-    }
+    // Function to sync input and select values
+    function syncSelectInput(select, input) {
+        select.addEventListener('change', () => {
+            input.value = select.value;
+        });
+        input.addEventListener('input', () => {
+            select.value = '';
+        });
+    }
+
+    const serverIpsInput = document.getElementById('serverIpsInput');
+    const serverIpsSelect = document.getElementById('serverIpsSelect');
+    syncSelectInput(serverIpsSelect, serverIpsInput);
+
+    const buildDirInput = document.getElementById('buildDirInput');
+    const buildDirSelect = document.getElementById('buildDirSelect');
+    syncSelectInput(buildDirSelect, buildDirInput);
+
+    const buildCommandInput = document.getElementById('buildCommandInput');
+    const buildCommandSelect = document.getElementById('buildCommandSelect');
+    syncSelectInput(buildCommandSelect, buildCommandInput);
+
+    const buildOutputDirInput = document.getElementById('buildOutputDirInput');
+    const buildOutputDirSelect = document.getElementById('buildOutputDirSelect');
+    syncSelectInput(buildOutputDirSelect, buildOutputDirInput);
+
+    const destinationPathInput = document.getElementById('destinationPathInput');
+    const destinationPathSelect = document.getElementById('destinationPathSelect');
+    syncSelectInput(destinationPathSelect, destinationPathInput);
+
+    copyForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const serverIps = serverIpsInput.value;
+        const buildDir = buildDirInput.value;
+        const buildCommand = buildCommandInput.value;
+        const buildOutputDir = buildOutputDirInput.value;
+        const destinationPath = destinationPathInput.value;
+
+        if (!buildOutputDir) {
+            alert('请提供构建输出目录');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/copy?serverIps=${serverIps}&buildDir=${buildDir}&buildCommand=${buildCommand}&buildOutputDir=${buildOutputDir}&destinationPath=${destinationPath}`);
+            const data = await response.json();
+
+            if (response.ok) {
+                const filesAndFolders = data.filesAndFolders;
+                fileCheckboxes.innerHTML = '';
+
+                filesAndFolders.forEach(item => {
+                    const checkbox = document.createElement('div');
+                    checkbox.className = 'form-check';
+                    checkbox.innerHTML = `
+                        <input class="form-check-input" type="checkbox" value="${item.path}" id="${item.path}">
+                        <label class="form-check-label" for="${item.path}">${item.name}</label>
+                    `;
+                    fileCheckboxes.appendChild(checkbox);
+                });
+
+                fileSelectionModal.show();
+            } else {
+                alert(data.error);
+            }
+        } catch (error) {
+            alert('获取文件和文件夹列表时出错');
+        }
+    });
+
+    selectAllButton.addEventListener('click', () => {
+        const checkboxes = document.querySelectorAll('#fileCheckboxes .form-check-input');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = true;
+        });
+    });
+
+    const fileSelectionForm = document.getElementById('fileSelectionForm');
+    fileSelectionForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const serverIps = serverIpsInput.value;
+        const destinationPath = destinationPathInput.value;
+        const buildOutputDir = buildOutputDirInput.value;
+
+        // 获取选中的文件和文件夹路径，并构建绝对路径
+        const selectedFiles = Array.from(document.querySelectorAll('#fileCheckboxes .form-check-input:checked')).map(cb => {
+            return buildOutputDir + '' + cb.value; // 拼接绝对路径
+        });
+
+        if (selectedFiles.length === 0) {
+            alert('请选择至少一个文件或文件夹');
+            return;
+        }
+
+        try {
+            const response = await fetch('/copyFile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    serverIps,
+                    filePath: selectedFiles.join(' '), // Concatenate paths with a space
+                    destinationPath
+                })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                alert('文件复制成功');
+                fileSelectionModal.hide();
+            } else {
+                alert(data.error);
+            }
+        } catch (error) {
+            alert('文件复制时出错');
+        }
+    });
 });
 
-// File Selection
-$('#fileSelectionForm').on('submit', function(event) {
-    event.preventDefault();
-
-    const serverIps = $('#serverIps').val();
-    const destinationPath = $('#destinationPath').val();
-
-    // 获取选中的文件路径
-    const selectedFiles = $('#fileCheckboxes input:checked').map(function() {
-        return $(this).val();
-    }).get();
-
-    if (selectedFiles.length === 0) {
-        alert('请至少选择一个文件');
-        return;
-    }
-
-    // 遍历每个选中的文件，并发送请求
-    selectedFiles.forEach(filePath => {
-        axios.post(`/copyFile`, {
-            serverIps: serverIps, // 确保 serverIps 参数被传递
-            filePath: filePath,
-            destinationPath: destinationPath
-        }, {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => {
-            $('#fileSelectionModal').modal('hide');
-            $('#copyResult').html(`<div class="alert alert-success">${response.data.message}</div>`);
-        })
-        .catch(error => {
-            $('#fileSelectionModal').modal('hide');
-            $('#copyResult').html(`<div class="alert alert-danger">${error.response.data.error}</div>`);
-        });
-    });
-});
 // 全选按钮事件处理
 $('#selectAll').on('click', function() {
-    $('#fileCheckboxes input[type="checkbox"]').prop('checked', true);
+    $('#fileCheckboxes input[type="checkbox"]').prop('checked', true);
 });
-
-
-
-
-
 
 
 // Update Docker Container
 $('#updateDockerForm').on('submit', function(event) {
-    event.preventDefault();
-    const version = $('#dockerVersion').val();
-    const containerName = $('#containerName').val();
-    const serverIps = $('#dockerServerIps').val().split(',').map(ip => ip.trim());
-    axios.post(`/update-docker/${version}/${containerName}`, { serverIps })
-        .then(response => {
-            $('#updateDockerResult').text(response.data.message);
-        })
-        .catch(error => {
-            $('#updateDockerResult').text(error.response.data.error);
-        });
+    event.preventDefault();
+    const version = $('#dockerVersion').val();
+    const containerName = $('#containerName').val();
+    const serverIps = $('#dockerServerIps').val().split(',').map(ip => ip.trim());
+    axios.post(`/update-docker/${version}/${containerName}`, { serverIps })
+        .then(response => {
+            $('#updateDockerResult').text(response.data.message);
+        })
+        .catch(error => {
+            $('#updateDockerResult').text(error.response.data.error);
+        });
 });
 
 // List Docker Containers
 $('#listContainersButton').on('click', function() {
-    axios.get('/list-containers')
-        .then(response => {
-            $('#listContainersResult').html('<pre>' + JSON.stringify(response.data, null, 2) + '</pre>');
-        })
-        .catch(error => {
-            $('#listContainersResult').text(error.response.data.error);
-        });
+    axios.get('/list-containers')
+        .then(response => {
+            $('#listContainersResult').html('<pre>' + JSON.stringify(response.data, null, 2) + '</pre>');
+        })
+        .catch(error => {
+            $('#listContainersResult').text(error.response.data.error);
+        });
 });
 
- // 暂停 Docker 容器
- $('#pauseContainerForm').on('submit', function(event) {
-    event.preventDefault();
-    const containerName = $('#pauseContainerName').val();
-    axios.post(`/pause-container/${containerName}`)
-        .then(response => {
-            if (response.status === 200) {
-                // 返回200时，弹出成功提示框
-                $('#feedbackMessage').text('容器已成功暂停');
-                $('#feedbackModal').modal('show');
-                // 不重置表单在这里执行
-            }
-        })
-        .catch(error => {
-            if (error.response && error.response.status === 404) {
-                // 返回404时，弹出“容器不存在”提示框
-                $('#feedbackMessage').text('容器不存在');
-            } else {
-                // 其他错误处理
-                $('#feedbackMessage').text(error.response.data.error || '发生错误');
-            }
-            $('#feedbackModal').modal('show');
-            // 隐藏表单
-            $('#pauseContainerForm').hide();
-        });
+ // 暂停 Docker 容器
+ $('#pauseContainerForm').on('submit', function(event) {
+    event.preventDefault();
+    const containerName = $('#pauseContainerName').val();
+    axios.post(`/pause-container/${containerName}`)
+        .then(response => {
+            if (response.status === 200) {
+                // 返回200时，弹出成功提示框
+                $('#feedbackMessage').text('容器已成功暂停');
+                $('#feedbackModal').modal('show');
+                // 不重置表单在这里执行
+            }
+        })
+        .catch(error => {
+            if (error.response && error.response.status === 404) {
+                // 返回404时，弹出“容器不存在”提示框
+                $('#feedbackMessage').text('容器不存在');
+            } else {
+                // 其他错误处理
+                $('#feedbackMessage').text(error.response.data.error || '发生错误');
+            }
+            $('#feedbackModal').modal('show');
+            // 隐藏表单
+            $('#pauseContainerForm').hide();
+        });
 });
 
 // 绑定确认按钮点击事件
 $('#confirmFeedbackButton').on('click', function() {
-    // 关闭模态框
-    $('#feedbackModal').modal('hide');
-    // 显示表单
-    $('#pauseContainerForm').show();
-    // 重置表单
-    $('#pauseContainerForm')[0].reset();
+    // 关闭模态框
+    $('#feedbackModal').modal('hide');
+    // 显示表单
+    $('#pauseContainerForm').show();
+    // 重置表单
+    $('#pauseContainerForm')[0].reset();
 });
 
 
 // Delete Docker Container
 $('#deleteContainerForm').on('submit', function(event) {
-    event.preventDefault();
-    const containerName = $('#deleteContainerName').val();
-    axios.delete(`/delete-container/${containerName}`)
-        .then(response => {
-            $('#deleteContainerResult').text(response.data.message);
-        })
-        .catch(error => {
-            $('#deleteContainerResult').text(error.response.data.error);
-        });
+    event.preventDefault();
+    const containerName = $('#deleteContainerName').val();
+    axios.delete(`/delete-container/${containerName}`)
+        .then(response => {
+            $('#deleteContainerResult').text(response.data.message);
+        })
+        .catch(error => {
+            $('#deleteContainerResult').text(error.response.data.error);
+        });
 });
 
 // Get Logs
 $('#getLogsForm').on('submit', function(event) {
-    event.preventDefault();
-    const containerName = $('#logContainerName').val();
-    const serverIp = $('#logServerIp').val() || ''; // 如果为空，设置为默认IP
-    axios.get(`/logs/${containerName}`, { params: { serverIp } })
-        .then(response => {
-            const logFileURL = response.data.logFileURL;
-            $('#logResult').html(`
-                <p>Log file has been generated. You can download it from the following link:</p>
-                <a href="${logFileURL}" target="_blank">${logFileURL}</a>
-            `);
-        })
-        .catch(error => {
-            if (error.response.status === 404) {
-                $('#logResult').html(`<div class="alert alert-danger">Container not found</div>`);
-            } else {
-                $('#logResult').text(error.response.data.error);
-            }
-        });
+    event.preventDefault();
+    const containerName = $('#logContainerName').val();
+    const serverIp = $('#logServerIp').val() || ''; // 如果为空，设置为默认IP
+    axios.get(`/logs/${containerName}`, { params: { serverIp } })
+        .then(response => {
+            const logFileURL = response.data.logFileURL;
+            $('#logResult').html(`
+                <p>Log file has been generated. You can download it from the following link:</p>
+                <a href="${logFileURL}" target="_blank">${logFileURL}</a>
+            `);
+        })
+        .catch(error => {
+            if (error.response.status === 404) {
+                $('#logResult').html(`<div class="alert alert-danger">Container not found</div>`);
+            } else {
+                $('#logResult').text(error.response.data.error);
+            }
+        });
 });
 
 //status
 $(document).ready(function() {
-    $('#statusButton').on('click', function() {
-        showLoading();
-        axios.get('/status')
-            .then(response => {
-                $('#statusResult').html('<pre>' + JSON.stringify(response.data, null, 2) + '</pre>');
-                $('#statusModal').modal('show');
-            })
-            .catch(error => {
-                $('#statusResult').text(error.response.data.error || '发生了意外错误。');
-                $('#statusModal').modal('show');
-            })
-            .finally(() => {
-                hideLoading();
-            });
-    });
+    $('#statusButton').on('click', function() {
+        showLoading();
+        axios.get('/status')
+            .then(response => {
+                $('#statusResult').html('<pre>' + JSON.stringify(response.data, null, 2) + '</pre>');
+                $('#statusModal').modal('show');
+            })
+            .catch(error => {
+                $('#statusResult').text(error.response.data.error || '发生了意外错误。');
+                $('#statusModal').modal('show');
+            })
+            .finally(() => {
+                hideLoading();
+            });
+    });
 });
 
 // Reboot Server
 $('#rebootButton').on('click', function() {
-    showLoading();
-    axios.post('/reboot')
-        .then(response => {
-            showResultModal(response.data.message);
-        })
-        .catch(error => {
-            showResultModal(error.response.data.error || '发生了意外错误。');
-        })
-        .finally(() => {
-            hideLoading();
-        });
+    showLoading();
+    axios.post('/reboot')
+        .then(response => {
+            showResultModal(response.data.message);
+        })
+        .catch(error => {
+            showResultModal(error.response.data.error || '发生了意外错误。');
+        })
+        .finally(() => {
+            hideLoading();
+        });
 });
 
 function showLoading() {
-            // Add loading indication logic here if needed
-        }
+            // Add loading indication logic here if needed
+        }
 function hideLoading() {
-            // Add loading indication hide logic here if needed
-        }
+            // Add loading indication hide logic here if needed
+        }
 
 // Manage Firewall
 $('#firewallForm').on('submit', function(event) {
-            event.preventDefault();
-            showLoading();
-            const action = $('#firewallAction').val();
-            const rule = $('#firewallRule').val();
-            axios.post('/firewall', null, {
-                params: {
-                    action: action,
-                    rule: rule
-                }
-            })
-            .then(response => {
-                $('#resultModalBody').text(response.data.message || '操作成功。');
-                $('#resultModal').modal('show');
-            })
-            .catch(error => {
-                $('#resultModalBody').text(error.response.data.error || '发生了意外错误。');
-                $('#resultModal').modal('show');
-            })
-            .finally(() => {
-                hideLoading();
-            });
-        });
+            event.preventDefault();
+            showLoading();
+            const action = $('#firewallAction').val();
+            const rule = $('#firewallRule').val();
+            axios.post('/firewall', null, {
+                params: {
+                    action: action,
+                    rule: rule
+                }
+            })
+            .then(response => {
+                $('#resultModalBody').text(response.data.message || '操作成功。');
+                $('#resultModal').modal('show');
+            })
+            .catch(error => {
+                $('#resultModalBody').text(error.response.data.error || '发生了意外错误。');
+                $('#resultModal').modal('show');
+            })
+            .finally(() => {
+                hideLoading();
+            });
+        });
 
 // System Info
 $('#systemInfoButton').on('click', function() {
-    showLoading();
-    axios.get('/system-info')
-        .then(response => {
-            $('#systemInfoResult').html('<pre>' + JSON.stringify(response.data, null, 2) + '</pre>');
-        })
-        .catch(error => {
-            $('#systemInfoResult').text(error.response.data.error || '发生了意外错误。');
-        })
-        .finally(() => {
-            hideLoading();
-        });
+    showLoading();
+    axios.get('/system-info')
+        .then(response => {
+            $('#systemInfoResult').html('<pre>' + JSON.stringify(response.data, null, 2) + '</pre>');
+        })
+        .catch(error => {
+            $('#systemInfoResult').text(error.response.data.error || '发生了意外错误。');
+        })
+        .finally(() => {
+            hideLoading();
+        });
 });
 
 // Disk Usage
 $(document).ready(function() {
-    // Disk Usage
-    $('#diskUsageButton').on('click', function() {
-        showLoading();
-        axios.get('/disk-usage')
-            .then(response => {
-                $('#diskUsageResult').html('<pre>' + response.data + '</pre>');
-                $('#diskUsageModal').modal('show');
-            })
-            .catch(error => {
-                $('#diskUsageResult').text(error.response.data.error || '发生了意外错误。');
-                $('#diskUsageModal').modal('show');
-            })
-            .finally(() => {
-                hideLoading();
-            });
-    });
+    // Disk Usage
+    $('#diskUsageButton').on('click', function() {
+        showLoading();
+        axios.get('/disk-usage')
+            .then(response => {
+                $('#diskUsageResult').html('<pre>' + response.data + '</pre>');
+                $('#diskUsageModal').modal('show');
+            })
+            .catch(error => {
+                $('#diskUsageResult').text(error.response.data.error || '发生了意外错误。');
+                $('#diskUsageModal').modal('show');
+            })
+            .finally(() => {
+                hideLoading();
+            });
+    });
 
-    // System Load
-    $('#loadButton').on('click', function() {
-        showLoading();
-        axios.get('/load')
-            .then(response => {
-                $('#loadResult').html('<pre>' + response.data + '</pre>');
-                $('#loadModal').modal('show');
-            })
-            .catch(error => {
-                $('#loadResult').text(error.response.data.error || '发生了意外错误。');
-                $('#loadModal').modal('show');
-            })
-            .finally(() => {
-                hideLoading();
-            });
-    });
+    // System Load
+    $('#loadButton').on('click', function() {
+        showLoading();
+        axios.get('/load')
+            .then(response => {
+                $('#loadResult').html('<pre>' + response.data + '</pre>');
+                $('#loadModal').modal('show');
+            })
+            .catch(error => {
+                $('#loadResult').text(error.response.data.error || '发生了意外错误。');
+                $('#loadModal').modal('show');
+            })
+            .finally(() => {
+                hideLoading();
+            });
+    });
 
-    // Memory Usage
-    $('#memoryUsageButton').on('click', function() {
-        showLoading();
-        axios.get('/memory-usage')
-            .then(response => {
-                $('#memoryUsageResult').html('<pre>' + response.data + '</pre>');
-                $('#memoryUsageModal').modal('show');
-            })
-            .catch(error => {
-                $('#memoryUsageResult').text(error.response.data.error || '发生了意外错误。');
-                $('#memoryUsageModal').modal('show');
-            })
-            .finally(() => {
-                hideLoading();
-            });
-    });
+    // Memory Usage
+    $('#memoryUsageButton').on('click', function() {
+        showLoading();
+        axios.get('/memory-usage')
+            .then(response => {
+                $('#memoryUsageResult').html('<pre>' + response.data + '</pre>');
+                $('#memoryUsageModal').modal('show');
+            })
+            .catch(error => {
+                $('#memoryUsageResult').text(error.response.data.error || '发生了意外错误。');
+                $('#memoryUsageModal').modal('show');
+            })
+            .finally(() => {
+                hideLoading();
+            });
+    });
 
-    // System Logs
-    $('#logsButton').on('click', function() {
-        showLoading();
-        axios.get('/logs')
-            .then(response => {
-                $('#logsResult').html('<pre>' + response.data + '</pre>');
-                $('#logsModal').modal('show');
-            })
-            .catch(error => {
-                $('#logsResult').text(error.response.data.error || '发生了意外错误。');
-                $('#logsModal').modal('show');
-            })
-            .finally(() => {
-                hideLoading();
-            });
-    });
+    // System Logs
+    $('#logsButton').on('click', function() {
+        showLoading();
+        axios.get('/logs')
+            .then(response => {
+                $('#logsResult').html('<pre>' + response.data + '</pre>');
+                $('#logsModal').modal('show');
+            })
+            .catch(error => {
+                $('#logsResult').text(error.response.data.error || '发生了意外错误。');
+                $('#logsModal').modal('show');
+            })
+            .finally(() => {
+                hideLoading();
+            });
+    });
 });
 
 //Terminal
 $(document).ready(function () {
-    const socket = {
-        connection: null,
-        isOpen: false
-    };
+    const socket = {
+        connection: null,
+        isOpen: false
+    };
 
-    // 登录表单提交事件
-    $('#loginForm').on('submit', function (e) {
-        e.preventDefault();
+    // 登录表单提交事件
+    $('#loginForm').on('submit', function (e) {
+        e.preventDefault();
 
-        const username = $('#username').val();
-        const passwd = $('#passwd').val();
-        const serverip = $('#serverip').val();
+        const username = $('#username').val();
+        const passwd = $('#passwd').val();
+        const serverip = $('#serverip').val();
 
-        axios.post('/serverlogin', null, {
-            params: { username, passwd, serverip }
-        })
-        .then(response => {
-            $('#loginResult').text(response.data.message);
-            $('#loginModal').modal('hide');
-            $('#terminalModal').modal('show');
+        axios.post('/serverlogin', null, {
+            params: { username, passwd, serverip }
+        })
+        .then(response => {
+            $('#loginResult').text(response.data.message);
+            $('#loginModal').modal('hide');
+            $('#terminalModal').modal('show');
 
-            // 连接 WebSocket
-            socket.connection = new WebSocket(`ws://localhost:8081/terminal?username=${username}`);
+            // 连接 WebSocket
+            socket.connection = new WebSocket(`ws://localhost:8081/terminal?username=${username}`);
 
 socket.connection.onopen = () => {
-    console.log('WebSocket connection established');
+    console.log('WebSocket connection established');
 };
 
 socket.connection.onmessage = (event) => {
-    console.log('Message from server:', event.data);
+    console.log('Message from server:', event.data);
 };
 
 socket.connection.onclose = (event) => {
-    if (event.wasClean) {
-        console.log(`Connection closed cleanly, code=${event.code}, reason=${event.reason}`);
-    } else {
-        console.error(`Connection died, code=${event.code}`);
-    }
+    if (event.wasClean) {
+        console.log(`Connection closed cleanly, code=${event.code}, reason=${event.reason}`);
+    } else {
+        console.error(`Connection died, code=${event.code}`);
+    }
 };
 
 socket.connection.onerror = (error) => {
-    console.error('WebSocket error:', error);
+    console.error('WebSocket error:', error);
 };
 
 // Check WebSocket status before sending data
 $('#terminalInput').on('keypress', function (e) {
-    if (e.which === 13) {
-        if (socket.connection.readyState === WebSocket.OPEN) {
-            const command = $(this).val();
-            socket.connection.send(command + '\n');
-            $(this).val('');
-        } else {
-            console.error('WebSocket is not open. Cannot send message.');
-        }
-    }
+    if (e.which === 13) {
+        if (socket.connection.readyState === WebSocket.OPEN) {
+            const command = $(this).val();
+            socket.connection.send(command + '\n');
+            $(this).val('');
+        } else {
+            console.error('WebSocket is not open. Cannot send message.');
+        }
+    }
 });
 
 
 socket.connection.onerror = (error) => {
-    console.error('WebSocket error:', error);
+    console.error('WebSocket error:', error);
 };
 
 $('#terminalInput').on('keypress', function (e) {
-    if (e.which === 13 && socket.connection.readyState === WebSocket.OPEN) {
-        const command = $(this).val();
-        socket.connection.send(command + '\n');
-        $(this).val('');
-    } else {
-        console.error('WebSocket is not open. Cannot send message.');
-    }
+    if (e.which === 13 && socket.connection.readyState === WebSocket.OPEN) {
+        const command = $(this).val();
+        socket.connection.send(command + '\n');
+        $(this).val('');
+    } else {
+        console.error('WebSocket is not open. Cannot send message.');
+    }
 });
 
 
 
-            // 发送终端命令
-            $('#terminalInput').on('keypress', function (e) {
-                if (e.which === 13) {
-                    if (socket.isOpen) {
-                        const command = $(this).val();
-                        console.log('Sending command to server:', command);
-                        socket.connection.send(command + '\n');
-                        $(this).val('');
-                    } else {
-                        console.log('WebSocket is not open. Cannot send message.');
-                    }
-                }
-            });
-        })
-        .catch(error => {
-            $('#loginResult').text('登录失败: ' + error.message);
-        });
-    });
+            // 发送终端命令
+            $('#terminalInput').on('keypress', function (e) {
+                if (e.which === 13) {
+                    if (socket.isOpen) {
+                        const command = $(this).val();
+                        console.log('Sending command to server:', command);
+                        socket.connection.send(command + '\n');
+                        $(this).val('');
+                    } else {
+                        console.log('WebSocket is not open. Cannot send message.');
+                    }
+                }
+            });
+        })
+        .catch(error => {
+            $('#loginResult').text('登录失败: ' + error.message);
+        });
+    });
 });
 
 function showLoading() {
-    // Implement your loading spinner logic here
+    // Implement your loading spinner logic here
 }
 
 function hideLoading() {
-    // Implement your hide loading spinner logic here
+    // Implement your hide loading spinner logic here
 }
 
 
@@ -1025,3 +1084,6 @@ function hideLoading() {
 </script>
 </body>
 </html>
+
+
+
