@@ -275,50 +275,61 @@ func copyFile(c *gin.Context) {
 // @Tags docker
 // @Accept  json
 // @Produce  json
-// @Param version path string true "版本号"
 // @Param containerName path string true "Docker 容器名"
+// @Param image query string true "镜像名称和版本号，如 harbor.sqray.com:5012/dev/meeting:v1.0.91"
 // @Param serverIps query string true "服务器 IP 列表，以逗号分隔"
+// @Param port query string true "容器暴露的端口号"
 // @Success 200 {string} string "Docker containers started successfully"
 // @Failure 400 {string} string "Invalid input"
 // @Failure 500 {string} string "Internal server error"
-// @Router /update-docker/{version}/{containerName} [post]
+// @Router /update-docker/{containerName} [post]
 func handleUpdateDocker(c *gin.Context) {
-	version := c.Param("version")
-	containerName := c.Param("containerName")
-	if version == "" || containerName == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "请提供版本号和容器名参数"})
-		return
-	}
+    containerName := c.Param("containerName")
 
-	serverIps := c.Query("serverIps")
-	if serverIps == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "请提供服务器 IP 参数"})
-		return
-	}
+    image := c.Query("image")
+    if image == "" || containerName == "" {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "请提供镜像名称、版本号和容器名参数"})
+        return
+    }
 
-	// 将 IP 列表拆分为字符串数组
-	servers := strings.Split(serverIps, ",")
+    serverIps := c.Query("serverIps")
+    if serverIps == "" {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "请提供服务器 IP 参数"})
+        return
+    }
 
-	for _, server := range servers {
-		server = strings.TrimSpace(server)
-		if server == "" {
-			continue
-		}
+    port := c.Query("port")
+    if port == "" {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "请提供端口号参数"})
+        return
+    }
 
-		// 在目标服务器上执行 Docker 命令
-		sshCommand := fmt.Sprintf(`
-			docker rm -f %s
-			docker run --name=%s -itd --cpus=4 --memory=8g -p 7014:80 -v /root/apollo/%s/appsettings.json:/app/appsettings.json --restart=always harbor.sqray.com:5012/dev/cellculture:v2.0.%s
-		`, containerName, containerName, containerName, version)
-		cmd := exec.Command("ssh", fmt.Sprintf("root@%s", server), sshCommand)
-		_, err := cmd.CombinedOutput()
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Docker 容器在 %s 上运行失败: %s", server, err.Error())})
-			return
-		}
-	}
+    servers := strings.Split(serverIps, ",")
 
-	c.String(http.StatusOK, "Docker containers started successfully")
+    for _, server := range servers {
+        server = strings.TrimSpace(server)
+        if server == "" {
+            continue
+        }
+
+        sshCommand := fmt.Sprintf(`
+            if docker ps -a --format '{{.Names}}' | grep -q '^%s$'; then
+                docker rm -f %s
+            fi
+            docker run --name=%s -itd --cpus=4 --memory=8g -p %s:80 -v /root/apollo/%s/appsettings.json:/app/appsettings.json --restart=always %s
+        `, containerName, containerName, containerName, port, containerName, image)
+
+        cmd := exec.Command("ssh", fmt.Sprintf("root@%s", server), sshCommand)
+        output, err := cmd.CombinedOutput()
+        if err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Docker 容器在 %s 上运行失败: %s", server, err.Error())})
+            return
+        }
+
+        fmt.Printf("Command output: %s\n", output)
+    }
+
+    c.String(http.StatusOK, "Docker containers started successfully")
 }
 
 // 用户存储示例
@@ -979,7 +990,7 @@ func main() {
 	r.GET("/copy", copy)
 	r.POST("/copyFile", copyFile)
 	// 更新容器 API 路由
-	r.POST("/update-docker/:version/:containerName", handleUpdateDocker)
+	r.POST("/update-docker/:containerName", handleUpdateDocker)
 	// 用户登录路由
 	r.POST("/login/:username/:password", handleLogin)
 	// 部署 Ceph 路由
@@ -1004,3 +1015,4 @@ func main() {
 		log.Fatalf("Failed to start server: %v", err)
 	}
 }
+

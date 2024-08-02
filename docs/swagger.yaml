@@ -1,3 +1,14 @@
+definitions:
+  main.FileFolderInfo:
+    properties:
+      name:
+        type: string
+      path:
+        type: string
+      type:
+        description: '"file" or "folder"'
+        type: string
+    type: object
 info:
   contact: {}
 paths:
@@ -32,9 +43,11 @@ paths:
       - application/json
       responses:
         "200":
-          description: Files copied successfully
+          description: 文件和文件夹列表
           schema:
-            type: string
+            items:
+              $ref: '#/definitions/main.FileFolderInfo'
+            type: array
         "400":
           description: Invalid input
           schema:
@@ -217,6 +230,37 @@ paths:
       summary: 列出所有 Docker 容器
       tags:
       - docker
+  /listFiles:
+    get:
+      consumes:
+      - application/json
+      description: 列出指定目录下的文件和文件夹
+      parameters:
+      - description: 构建输出目录
+        in: query
+        name: buildOutputDir
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 文件和文件夹列表
+          schema:
+            items:
+              $ref: '#/definitions/main.FileFolderInfo'
+            type: array
+        "400":
+          description: Invalid input
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: 列出文件和文件夹
+      tags:
+      - deployment
   /load:
     get:
       description: 获取系统负载信息
@@ -433,25 +477,30 @@ paths:
       summary: WebSocket 终端接口
       tags:
       - terminal
-  /update-docker/{version}/{containerName}:
+  /update-docker/{containerName}:
     post:
       consumes:
       - application/json
       description: 在目标服务器上运行 Docker 容器
       parameters:
-      - description: 版本号
-        in: path
-        name: version
-        required: true
-        type: string
       - description: Docker 容器名
         in: path
         name: containerName
         required: true
         type: string
+      - description: 镜像名称和版本号，如 harbor.sqray.com:5012/dev/meeting:v1.0.91
+        in: query
+        name: image
+        required: true
+        type: string
       - description: 服务器 IP 列表，以逗号分隔
         in: query
         name: serverIps
+        required: true
+        type: string
+      - description: 容器暴露的端口号
+        in: query
+        name: port
         required: true
         type: string
       produces:

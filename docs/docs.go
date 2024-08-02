@@ -63,9 +63,12 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Files copied successfully",
+                        "description": "文件和文件夹列表",
                         "schema": {
-                            "type": "string"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/main.FileFolderInfo"
+                            }
                         }
                     },
                     "400": {
@@ -331,6 +334,53 @@ const docTemplate = `{
                                 "type": "object",
                                 "additionalProperties": true
                             }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/listFiles": {
+            "get": {
+                "description": "列出指定目录下的文件和文件夹",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "deployment"
+                ],
+                "summary": "列出文件和文件夹",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "构建输出目录",
+                        "name": "buildOutputDir",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "文件和文件夹列表",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/main.FileFolderInfo"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input",
+                        "schema": {
+                            "type": "string"
                         }
                     },
                     "500": {
@@ -669,7 +719,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/update-docker/{version}/{containerName}": {
+        "/update-docker/{containerName}": {
             "post": {
                 "description": "在目标服务器上运行 Docker 容器",
                 "consumes": [
@@ -685,13 +735,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "版本号",
-                        "name": "version",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "description": "Docker 容器名",
                         "name": "containerName",
                         "in": "path",
@@ -699,8 +742,22 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "description": "镜像名称和版本号，如 harbor.sqray.com:5012/dev/meeting:v1.0.91",
+                        "name": "image",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "服务器 IP 列表，以逗号分隔",
                         "name": "serverIps",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "容器暴露的端口号",
+                        "name": "port",
                         "in": "query",
                         "required": true
                     }
@@ -724,6 +781,23 @@ const docTemplate = `{
                             "type": "string"
                         }
                     }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "main.FileFolderInfo": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "type": {
+                    "description": "\"file\" or \"folder\"",
+                    "type": "string"
                 }
             }
         }

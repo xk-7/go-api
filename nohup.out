@@ -1,0 +1,131 @@
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /css/*filepath            --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
+[GIN-debug] HEAD   /css/*filepath            --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
+[GIN-debug] GET    /js/*filepath             --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
+[GIN-debug] HEAD   /js/*filepath             --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
+[GIN-debug] GET    /                         --> main.main.(*RouterGroup).StaticFile.func1 (3 handlers)
+[GIN-debug] HEAD   /                         --> main.main.(*RouterGroup).StaticFile.func1 (3 handlers)
+[GIN-debug] GET    /swagger/*any             --> github.com/swaggo/gin-swagger.CustomWrapHandler.func1 (3 handlers)
+[GIN-debug] POST   /create-user/:username/:password --> main.createUser (3 handlers)
+[GIN-debug] GET    /status                   --> main.getStatus (3 handlers)
+[GIN-debug] POST   /firewall                 --> main.manageFirewall (3 handlers)
+[GIN-debug] GET    /system-info              --> main.getSystemInfo (3 handlers)
+[GIN-debug] GET    /disk-usage               --> main.getDiskUsage (3 handlers)
+[GIN-debug] GET    /load                     --> main.getLoad (3 handlers)
+[GIN-debug] GET    /memory-usage             --> main.getMemoryUsage (3 handlers)
+[GIN-debug] GET    /logs                     --> main.getLogs (3 handlers)
+[GIN-debug] GET    /copy                     --> main.copy (3 handlers)
+[GIN-debug] POST   /copyFile                 --> main.copyFile (3 handlers)
+[GIN-debug] POST   /update-docker/:version/:containerName --> main.handleUpdateDocker (3 handlers)
+[GIN-debug] POST   /login/:username/:password --> main.handleLogin (3 handlers)
+[GIN-debug] POST   /deploy-ceph              --> main.deployCeph (3 handlers)
+[GIN-debug] GET    /list-containers          --> main.listContainers (3 handlers)
+[GIN-debug] POST   /pause-container/:containerName --> main.pauseContainer (3 handlers)
+[GIN-debug] DELETE /delete-container/:containerName --> main.deleteContainer (3 handlers)
+[GIN-debug] GET    /logs/:containerName      --> main.getContainerLogs (3 handlers)
+[GIN-debug] GET    /downloads/*filepath      --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
+[GIN-debug] HEAD   /downloads/*filepath      --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
+[GIN-debug] POST   /serverlogin              --> main.serverLogin (3 handlers)
+[GIN-debug] GET    /terminal                 --> main.terminal (3 handlers)
+2024/07/29 09:36:03 Starting server on :8081
+[GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
+Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
+[GIN-debug] Listening and serving HTTP on :8081
+[GIN] 2024/07/29 - 09:36:04 | 200 |    8.721119ms |    192.168.20.9 | GET      "/"
+[GIN] 2024/07/29 - 09:36:04 | 200 |   17.323526ms |    192.168.20.9 | GET      "/css/bootstrap.min.css"
+[GIN] 2024/07/29 - 09:36:04 | 200 |     440.209µs |    192.168.20.9 | GET      "/js/jquery-3.5.1.slim.min.js"
+[GIN] 2024/07/29 - 09:36:04 | 200 |     293.646µs |    192.168.20.9 | GET      "/js/popper.min.js"
+[GIN] 2024/07/29 - 09:36:04 | 200 |     428.679µs |    192.168.20.9 | GET      "/js/axios.min.js"
+[GIN] 2024/07/29 - 09:36:04 | 200 |      487.58µs |    192.168.20.9 | GET      "/js/bootstrap.min.js"
+[GIN] 2024/07/29 - 09:36:04 | 404 |        1.09µs |    192.168.20.9 | GET      "/favicon.ico"
+[GIN] 2024/07/30 - 10:47:20 | 200 |   18.971019ms |    192.168.20.9 | GET      "/"
+[GIN] 2024/07/30 - 10:47:20 | 200 |   21.153437ms |    192.168.20.9 | GET      "/js/jquery-3.5.1.slim.min.js"
+[GIN] 2024/07/30 - 10:47:20 | 200 |   20.950802ms |    192.168.20.9 | GET      "/js/popper.min.js"
+[GIN] 2024/07/30 - 10:47:20 | 200 |   33.191781ms |    192.168.20.9 | GET      "/css/bootstrap.min.css"
+[GIN] 2024/07/30 - 10:47:20 | 200 |     307.127µs |    192.168.20.9 | GET      "/js/axios.min.js"
+[GIN] 2024/07/30 - 10:47:20 | 200 |    4.959749ms |    192.168.20.9 | GET      "/js/bootstrap.min.js"
+[GIN] 2024/07/30 - 10:47:20 | 404 |         1.1µs |    192.168.20.9 | GET      "/favicon.ico"
+[GIN] 2024/07/30 - 15:47:45 | 304 |   10.203289ms |    192.168.20.9 | GET      "/"
+[GIN] 2024/07/30 - 15:49:05 | 200 |     702.754µs |    192.168.20.9 | GET      "/"
+[GIN] 2024/07/30 - 15:49:05 | 200 |    3.172415ms |    192.168.20.9 | GET      "/css/bootstrap.min.css"
+[GIN] 2024/07/30 - 15:49:05 | 200 |     331.467µs |    192.168.20.9 | GET      "/js/jquery-3.5.1.slim.min.js"
+[GIN] 2024/07/30 - 15:49:05 | 200 |     250.405µs |    192.168.20.9 | GET      "/js/popper.min.js"
+[GIN] 2024/07/30 - 15:49:05 | 200 |     405.989µs |    192.168.20.9 | GET      "/js/bootstrap.min.js"
+[GIN] 2024/07/30 - 15:49:05 | 200 |      472.21µs |    192.168.20.9 | GET      "/js/axios.min.js"
+[GIN] 2024/07/30 - 15:49:05 | 404 |         700ns |    192.168.20.9 | GET      "/favicon.ico"
+[GIN] 2024/07/30 - 17:55:48 | 200 |   31.744718ms |    192.168.20.9 | GET      "/copy?serverIps=120.78.213.120,39.108.68.102&buildDir=&buildCommand=&buildOutputDir=/root/dockerdata/jenkins/workspace/rcpweb/dist/&destinationPath=/usr/share/nginx/html/rcpweb"
+[GIN] 2024/07/30 - 17:55:50 | 404 |     110.833µs |    192.168.20.9 | GET      "/js/popper.min.js.map"
+[GIN] 2024/07/30 - 17:55:50 | 404 |      91.332µs |    192.168.20.9 | GET      "/js/bootstrap.min.js.map"
+[GIN] 2024/07/30 - 17:55:50 | 404 |      71.031µs |    192.168.20.9 | GET      "/css/bootstrap.min.css.map"
+[GIN] 2024/07/30 - 17:55:50 | 404 |      67.971µs |    192.168.20.9 | GET      "/js/axios.min.js.map"
+ssh root@120.78.213.120 'rm -rvf /usr/share/nginx/html/rcpweb/js'
+scp -r /root/dockerdata/jenkins/workspace/rcpweb/dist//css /root/dockerdata/jenkins/workspace/rcpweb/dist//favicon.ico /root/dockerdata/jenkins/workspace/rcpweb/dist//fonts /root/dockerdata/jenkins/workspace/rcpweb/dist//hevc.js /root/dockerdata/jenkins/workspace/rcpweb/dist//hevc.wasm /root/dockerdata/jenkins/workspace/rcpweb/dist//img /root/dockerdata/jenkins/workspace/rcpweb/dist//index.html /root/dockerdata/jenkins/workspace/rcpweb/dist//js root@120.78.213.120:/usr/share/nginx/html/rcpweb
+ssh root@39.108.68.102 'rm -rvf /usr/share/nginx/html/rcpweb/js'
+scp -r /root/dockerdata/jenkins/workspace/rcpweb/dist//css /root/dockerdata/jenkins/workspace/rcpweb/dist//favicon.ico /root/dockerdata/jenkins/workspace/rcpweb/dist//fonts /root/dockerdata/jenkins/workspace/rcpweb/dist//hevc.js /root/dockerdata/jenkins/workspace/rcpweb/dist//hevc.wasm /root/dockerdata/jenkins/workspace/rcpweb/dist//img /root/dockerdata/jenkins/workspace/rcpweb/dist//index.html /root/dockerdata/jenkins/workspace/rcpweb/dist//js root@39.108.68.102:/usr/share/nginx/html/rcpweb
+[GIN] 2024/07/30 - 18:02:32 | 200 | 17.971643788s |    192.168.20.9 | POST     "/copyFile"
+[GIN] 2024/07/30 - 18:05:04 | 200 |     281.406µs |    192.168.20.9 | GET      "/copy?serverIps=120.78.213.120,39.108.68.102&buildDir=&buildCommand=&buildOutputDir=/root/dockerdata/jenkins/workspace/rcpweben/dist/&destinationPath=/usr/share/nginx/html/rcpweben"
+ssh root@120.78.213.120 'rm -rvf /usr/share/nginx/html/rcpweben/js'
+scp -r /root/dockerdata/jenkins/workspace/rcpweben/dist//css /root/dockerdata/jenkins/workspace/rcpweben/dist//favicon.ico /root/dockerdata/jenkins/workspace/rcpweben/dist//fonts /root/dockerdata/jenkins/workspace/rcpweben/dist//hevc.js /root/dockerdata/jenkins/workspace/rcpweben/dist//hevc.wasm /root/dockerdata/jenkins/workspace/rcpweben/dist//img /root/dockerdata/jenkins/workspace/rcpweben/dist//index.html /root/dockerdata/jenkins/workspace/rcpweben/dist//js root@120.78.213.120:/usr/share/nginx/html/rcpweben
+ssh root@39.108.68.102 'rm -rvf /usr/share/nginx/html/rcpweben/js'
+scp -r /root/dockerdata/jenkins/workspace/rcpweben/dist//css /root/dockerdata/jenkins/workspace/rcpweben/dist//favicon.ico /root/dockerdata/jenkins/workspace/rcpweben/dist//fonts /root/dockerdata/jenkins/workspace/rcpweben/dist//hevc.js /root/dockerdata/jenkins/workspace/rcpweben/dist//hevc.wasm /root/dockerdata/jenkins/workspace/rcpweben/dist//img /root/dockerdata/jenkins/workspace/rcpweben/dist//index.html /root/dockerdata/jenkins/workspace/rcpweben/dist//js root@39.108.68.102:/usr/share/nginx/html/rcpweben
+[GIN] 2024/07/30 - 18:05:31 | 200 | 18.839547673s |    192.168.20.9 | POST     "/copyFile"
+[GIN] 2024/08/01 - 18:00:32 | 200 |   19.690912ms |    192.168.20.9 | GET      "/"
+[GIN] 2024/08/01 - 18:00:32 | 200 |     756.055µs |    192.168.20.9 | GET      "/css/bootstrap.min.css"
+[GIN] 2024/08/01 - 18:00:32 | 200 |    3.799266ms |    192.168.20.9 | GET      "/js/popper.min.js"
+[GIN] 2024/08/01 - 18:00:32 | 200 |   10.230224ms |    192.168.20.9 | GET      "/js/jquery-3.5.1.slim.min.js"
+[GIN] 2024/08/01 - 18:00:32 | 200 |   18.311496ms |    192.168.20.9 | GET      "/js/axios.min.js"
+[GIN] 2024/08/01 - 18:00:32 | 200 |   19.221513ms |    192.168.20.9 | GET      "/js/bootstrap.min.js"
+[GIN] 2024/08/01 - 18:00:32 | 404 |         710ns |    192.168.20.9 | GET      "/favicon.ico"
+[GIN] 2024/08/01 - 18:01:10 | 200 |     332.947µs |    192.168.20.9 | GET      "/copy?serverIps=120.78.213.120,39.108.68.102&buildDir=&buildCommand=&buildOutputDir=/root/dockerdata/jenkins/workspace/rcpweb/dist/&destinationPath=/usr/share/nginx/html/rcpweb"
+ssh root@120.78.213.120 'rm -rvf /usr/share/nginx/html/rcpweb/js'
+scp -r /root/dockerdata/jenkins/workspace/rcpweb/dist//css /root/dockerdata/jenkins/workspace/rcpweb/dist//favicon.ico /root/dockerdata/jenkins/workspace/rcpweb/dist//fonts /root/dockerdata/jenkins/workspace/rcpweb/dist//hevc.js /root/dockerdata/jenkins/workspace/rcpweb/dist//hevc.wasm /root/dockerdata/jenkins/workspace/rcpweb/dist//img /root/dockerdata/jenkins/workspace/rcpweb/dist//index.html /root/dockerdata/jenkins/workspace/rcpweb/dist//js root@120.78.213.120:/usr/share/nginx/html/rcpweb
+ssh root@39.108.68.102 'rm -rvf /usr/share/nginx/html/rcpweb/js'
+scp -r /root/dockerdata/jenkins/workspace/rcpweb/dist//css /root/dockerdata/jenkins/workspace/rcpweb/dist//favicon.ico /root/dockerdata/jenkins/workspace/rcpweb/dist//fonts /root/dockerdata/jenkins/workspace/rcpweb/dist//hevc.js /root/dockerdata/jenkins/workspace/rcpweb/dist//hevc.wasm /root/dockerdata/jenkins/workspace/rcpweb/dist//img /root/dockerdata/jenkins/workspace/rcpweb/dist//index.html /root/dockerdata/jenkins/workspace/rcpweb/dist//js root@39.108.68.102:/usr/share/nginx/html/rcpweb
+[GIN] 2024/08/01 - 18:01:56 | 200 | 16.913107248s |    192.168.20.9 | POST     "/copyFile"
+[GIN] 2024/08/02 - 10:22:06 | 304 |     141.454µs |    192.168.20.9 | GET      "/"
+[GIN] 2024/08/02 - 10:22:06 | 404 |        1.54µs |    192.168.20.9 | GET      "/favicon.ico"
+[GIN] 2024/08/02 - 15:44:39 | 200 |   26.341952ms |    192.168.20.9 | GET      "/load"
+signal: killed
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /css/*filepath            --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
+[GIN-debug] HEAD   /css/*filepath            --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
+[GIN-debug] GET    /js/*filepath             --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
+[GIN-debug] HEAD   /js/*filepath             --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
+[GIN-debug] GET    /                         --> main.main.(*RouterGroup).StaticFile.func1 (3 handlers)
+[GIN-debug] HEAD   /                         --> main.main.(*RouterGroup).StaticFile.func1 (3 handlers)
+[GIN-debug] GET    /swagger/*any             --> github.com/swaggo/gin-swagger.CustomWrapHandler.func1 (3 handlers)
+[GIN-debug] POST   /create-user/:username/:password --> main.createUser (3 handlers)
+[GIN-debug] GET    /status                   --> main.getStatus (3 handlers)
+[GIN-debug] POST   /firewall                 --> main.manageFirewall (3 handlers)
+[GIN-debug] GET    /system-info              --> main.getSystemInfo (3 handlers)
+[GIN-debug] GET    /disk-usage               --> main.getDiskUsage (3 handlers)
+[GIN-debug] GET    /load                     --> main.getLoad (3 handlers)
+[GIN-debug] GET    /memory-usage             --> main.getMemoryUsage (3 handlers)
+[GIN-debug] GET    /logs                     --> main.getLogs (3 handlers)
+[GIN-debug] GET    /copy                     --> main.copy (3 handlers)
+[GIN-debug] POST   /copyFile                 --> main.copyFile (3 handlers)
+[GIN-debug] POST   /update-docker/:containerName --> main.handleUpdateDocker (3 handlers)
+[GIN-debug] POST   /login/:username/:password --> main.handleLogin (3 handlers)
+[GIN-debug] POST   /deploy-ceph              --> main.deployCeph (3 handlers)
+[GIN-debug] GET    /list-containers          --> main.listContainers (3 handlers)
+[GIN-debug] POST   /pause-container/:containerName --> main.pauseContainer (3 handlers)
+[GIN-debug] DELETE /delete-container/:containerName --> main.deleteContainer (3 handlers)
+[GIN-debug] GET    /logs/:containerName      --> main.getContainerLogs (3 handlers)
+[GIN-debug] GET    /downloads/*filepath      --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
+[GIN-debug] HEAD   /downloads/*filepath      --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (3 handlers)
+[GIN-debug] POST   /serverlogin              --> main.serverLogin (3 handlers)
+[GIN-debug] GET    /terminal                 --> main.terminal (3 handlers)
+2024/08/02 17:16:20 Starting server on :8081
+[GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
+Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
+[GIN-debug] Listening and serving HTTP on :8081
